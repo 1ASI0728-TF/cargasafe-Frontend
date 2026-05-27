@@ -1,0 +1,156 @@
+<div class="trip-container">
+  @if (tripState().loading()) {
+  <div class="loading-overlay">
+    <div class="loading-center">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading trip...</p>
+    </div>
+  </div>
+  } @else if (tripState().error()) {
+  <div class="error-banner">
+    <p>{{ tripState().error() }}</p>
+    <!-- <button mat-raised-button color="primary" (click)="retry()">Retry</button> -->
+  </div>
+  } @else if (tripState().data()) {
+  <div>
+    <header class="trip-header">
+      <h1>Trip #{{ trip().id }}</h1>
+      <!-- <span class="status-badge">{{ trip()?.statusId }}</span> -->
+      <div class="trip-dates">
+        <p>Created at {{ trip().createdAt | date : 'short' }}</p>
+        <!-- <p>Departure at {{ trip()?.departureAt | date : 'short' }}</p> -->
+      </div>
+    </header>
+
+    <div class="trip-content">
+      <section class="trip-info">
+        <div class="card">
+          <h3>Assigned to</h3>
+          <div class="card-entries">
+            <p>
+              <strong>Driver:</strong><br />
+              <!-- {{ trip().driverId }} -->
+              Juan Jose
+            </p>
+            <!-- <p>
+              <strong>Codriver:</strong><br />
+              {{ 'Not assigned' }}
+            </p> -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Origin Point</h3>
+          <div class="card-entries">
+            <p>
+              <strong>Name:</strong><br />
+              {{ trip().originPoint?.name }}
+            </p>
+            <p>
+              <strong>Address:</strong><br />
+              {{ trip().originPoint?.address }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="trip-map">
+        <google-map class="trip-map-cmp" [center]="center" [zoom]="zoom">
+          @for (marker of orderMarkers(); track marker) {
+          <map-marker [position]="marker"></map-marker>
+          }
+          <map-marker
+            [position]="originMarker()"
+            icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+          ></map-marker>
+        </google-map>
+      </section>
+    </div>
+
+    <section class="orders-section">
+      <h3>Delivery orders</h3>
+      @if (trip().deliveryOrders.length > 0) {
+      <table mat-table [dataSource]="trip().deliveryOrders" class="mat-elevation-z1">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let order">{{ order.id }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sequenceOrder">
+          <th mat-header-cell *matHeaderCellDef>Sequence</th>
+          <td mat-cell *matCellDef="let order">{{ order.sequenceOrder }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="clientEmail">
+          <th mat-header-cell *matHeaderCellDef>Client Email</th>
+          <td mat-cell *matCellDef="let order">{{ order.clientEmail }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="address">
+          <th mat-header-cell *matHeaderCellDef>Address</th>
+          <td mat-cell *matCellDef="let order">{{ order.address }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="arrivalAt">
+          <th mat-header-cell *matHeaderCellDef>Arrival at</th>
+          <td mat-cell *matCellDef="let order">
+            {{ order.arrivalAt ? (order.arrivalAt | date : 'short') : '-' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="temperatureThreshold">
+          <th mat-header-cell *matHeaderCellDef>Temperature</th>
+          <td mat-cell *matCellDef="let order">
+            @if (order.maxTemperature && order.minTemperature) {
+            <div>
+              <span>Min: {{ order?.minTemperature }}°</span>
+              <span> | </span>
+              <span>Max: {{ order.maxTemperature }}°</span>
+            </div>
+            } @else {
+            <span>Not configured</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="humidityThreshold">
+          <th mat-header-cell *matHeaderCellDef>Temperature</th>
+          <td mat-cell *matCellDef="let order">
+            @if (order.maxHumidity && order.minHumidity) {
+            <div>
+              <span>Min: {{ order.minHumidity }}</span>
+              <span> | </span>
+              <span>Max: {{ order.maxHumidity }}</span>
+            </div>
+            } @else {
+            <span>Not configured</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let order">{{ order.status }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let order">
+            @if (order.isPending()) {
+            <button mat-icon-button color="primary" (click)="markOrderAsDelivered(order.id)">
+              <mat-icon>task_alt</mat-icon>
+            </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      } @else {
+      <p class="empty-state">No delivery orders found for this trip.</p>
+      }
+    </section>
+  </div>
+  }
+</div>

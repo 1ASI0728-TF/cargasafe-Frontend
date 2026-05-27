@@ -1,0 +1,55 @@
+.mt { margin-top: 16px; }
+.table { border-radius: 12px; overflow: hidden; }
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+
+.dm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 16px;
+}
+
+.dm-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+
+.dm-header button[mat-raised-button] mat-icon {
+  margin-right: 6px;
+}
+
+
+
+@media (max-width: 640px) {
+  .dm-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+
+.dm-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+  border: 2px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 0 0 12px;
+  background: #fff;
+}
+.dm-search { width: 100%; }
+.dm-filter { width: 100%; }
+
+@media (max-width: 800px) {
+  .dm-toolbar { grid-template-columns: 1fr; }
+}
+

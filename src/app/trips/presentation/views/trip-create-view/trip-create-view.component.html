@@ -1,0 +1,349 @@
+<div class="page">
+  <!-- Botón simple para volver -->
+  <button class="btn-back" onclick="history.back()">← Back</button>
+
+  <h1 class="title">Create a trip</h1>
+
+  <form class="trip-form" [formGroup]="tripForm" autocomplete="off">
+    <!-- Driver -->
+    <mat-form-field appearance="outline">
+      <mat-label>Driver</mat-label>
+      <input matInput formControlName="driver" placeholder="Driver" />
+    </mat-form-field>
+
+    <!-- Codriver -->
+    <mat-form-field appearance="outline">
+      <mat-label>Codriver</mat-label>
+      <input matInput formControlName="codriver" placeholder="Search by user" />
+    </mat-form-field>
+
+    <!-- Plate -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Vehicle</mat-label>
+
+      <mat-select formControlName="vehicleId">
+        @for (item of vehicles(); track $index) {
+        <mat-option [value]="item.id"> {{ item.plate }} </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Device IoT -->
+    <mat-form-field appearance="outline">
+      <mat-label>Device IMEI</mat-label>
+      <input disabled matInput [value]="device()?.imei" readonly />
+    </mat-form-field>
+
+    <!-- Origin Point -->
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Origin point</mat-label>
+
+      <mat-select formControlName="originPoint">
+        @for (item of originPoints(); track $index) {
+
+        <mat-option [value]="item"> {{ item.name }} </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+  <!-- <div class="field full">
+    <div class="map-placeholder">
+      <div class="map-box">
+        <span>Map preview</span>
+      </div>
+    </div>
+  </div> -->
+
+  <section class="orders">
+    <div class="orders-header">
+      <h2>Delivery Orders</h2>
+      <button class="btn add" (click)="openAddOrder()">+ Add</button>
+    </div>
+
+    <div class="cards" *ngIf="deliveryOrders().length; else emptyState">
+      <div class="card" *ngFor="let o of deliveryOrders(); let i = index">
+        <div class="card-header">
+          <div class="address">{{ o.address }}</div>
+          <div class="actions">
+            <button class="icon" title="Edit" (click)="openEditOrder(i)">✎</button>
+            <button class="icon danger" title="Delete" (click)="deleteOrder(i)">✕</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="muted">Location</div>
+            <div class="mini">
+              lat: {{ o.lat | number : '1.4-4' }}, lng: {{ o.lng | number : '1.4-4' }}
+            </div>
+
+            <div class="muted mt8">Parameters</div>
+            <ul class="params">
+              <li *ngIf="o.enableTemperature">
+                Min temperature: <b>{{ o.minTemperature ?? '—' }}°</b> &nbsp;|&nbsp; Max
+                temperature: <b>{{ o.maxTemperature ?? '—' }}°</b>
+              </li>
+              <li *ngIf="o.enableHumidity">
+                Min humidity: <b>{{ o.minHumidity ?? '—' }}%</b>
+              </li>
+              <li *ngIf="o.enableVibration">
+                Max vibration: <b>{{ o.maxVibration ?? '—' }}g</b>
+              </li>
+              <li
+                *ngIf="!o.enableTemperature && !o.enableHumidity && !o.enableVibration"
+                class="muted"
+              >
+                No parameters set
+              </li>
+            </ul>
+
+            <div class="muted mt8">Notes</div>
+            <div>{{ o.notes || '—' }}</div>
+          </div>
+
+          <!-- <div class="col map-col">
+            <div class="map-preview">
+              <div class="route"></div>
+              <span>Map preview</span>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty">No delivery orders yet. Click <b>+ Add</b> to create one.</div>
+    </ng-template>
+  </section>
+
+  <div style="margin-top: 1rem; display: flex; justify-content: flex-end">
+    <button matButton="filled" (click)="saveTrip()">
+      <mat-icon slot="icon">save</mat-icon>
+      Save
+    </button>
+  </div>
+
+  <div class="overlay" [class.open]="isOrderModalOpen()" (click)="closeOrderModal()"></div>
+
+  <div class="modal" [class.open]="isOrderModalOpen()" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>Add/edit delivery order</h3>
+      <button class="icon close" (click)="closeOrderModal()">✕</button>
+    </div>
+
+    <form
+      class="modal-body"
+      [formGroup]="orderForm"
+      (ngSubmit)="saveOrder()"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Address -->
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Client Email</mat-label>
+        <input matInput formControlName="clientEmail" placeholder="example@mail.com" />
+
+        <mat-error
+          *ngIf="orderForm.get('clientEmail')?.touched && orderForm.get('clientEmail')?.invalid"
+        >
+          Email is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Address -->
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Address</mat-label>
+        <input
+          addressInput
+          matInput
+          formControlName="address"
+          placeholder="Av. Javier Prado"
+          (placeChanged)="onChangeAddress($event)"
+        />
+
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="orderForm.get('address')?.setValue('')"
+          aria-label="Clear"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+
+        <mat-error *ngIf="orderForm.get('address')?.touched && orderForm.get('address')?.invalid">
+          Address is required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- PARAMS GRID -->
+      <div class="params-grid">
+        <!-- Temperature -->
+        <div class="param-block">
+          <mat-slide-toggle formControlName="enableTemperature"> Temperature </mat-slide-toggle>
+
+          <div class="two">
+            <mat-form-field appearance="outline">
+              <mat-label>Min temperature</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                formControlName="minTemperature"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Max temperature</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                formControlName="maxTemperature"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Humidity -->
+        <div class="param-block">
+          <mat-slide-toggle formControlName="enableHumidity" color="primary">
+            Humidity
+          </mat-slide-toggle>
+
+          <div class="one">
+            <mat-form-field appearance="outline">
+              <mat-label>Min humidity</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                formControlName="minHumidity"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Vibration -->
+        <div class="param-block">
+          <mat-slide-toggle formControlName="enableVibration"> Vibration </mat-slide-toggle>
+
+          <div class="one">
+            <mat-form-field appearance="outline">
+              <mat-label>Max vibration</mat-label>
+              <input
+                matInput
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                step="0.1"
+                formControlName="maxVibration"
+              />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Notes</mat-label>
+        <input matInput formControlName="notes" placeholder="Take it easy!!!" />
+      </mat-form-field>
+
+      <!-- Submit -->
+      <button
+        mat-raised-button
+        color="primary"
+        class="btn save"
+        type="submit"
+        [disabled]="isSaving()"
+      >
+        <mat-progress-spinner
+          *ngIf="isSaving()"
+          mode="indeterminate"
+          diameter="20"
+        ></mat-progress-spinner>
+
+        <span *ngIf="!isSaving()">Save/Update</span>
+      </button>
+    </form>
+
+    <!-- <form class="modal-body" [formGroup]="orderForm" (ngSubmit)="saveOrder()" (click)="$event.stopPropagation()">
+      <div class="field full">
+        <label>Address</label>
+        <div class="address-row">
+          <input formControlName="address" placeholder="Av. Javier Prado" />
+          <button class="icon circle" type="button" title="Clear" (click)="orderForm.get('address')?.setValue('')">✕</button>
+        </div>
+        <div class="error" *ngIf="orderForm.get('address')?.touched && orderForm.get('address')?.invalid">
+          Address is required
+        </div>
+      </div>
+
+      <div class="params-grid">
+        <div class="param-block">
+          <label class="switch">
+            <input type="checkbox" formControlName="enableTemperature" />
+            <span class="slider"></span>
+          </label>
+          <span class="label">Temperature</span>
+
+          <div class="two">
+            <div>
+              <div class="muted small">Min temperature</div>
+              <input type="number" formControlName="minTemperature" placeholder="Input" />
+            </div>
+            <div>
+              <div class="muted small">Max temperature</div>
+              <input type="number" formControlName="maxTemperature" placeholder="Input" />
+            </div>
+          </div>
+        </div>
+
+        <div class="param-block">
+          <label class="switch">
+            <input type="checkbox" formControlName="enableHumidity" />
+            <span class="slider gray"></span>
+          </label>
+          <span class="label">Humidity</span>
+
+          <div class="one">
+            <div>
+              <div class="muted small">Min humidity</div>
+              <input type="number" formControlName="minHumidity" placeholder="Input" />
+            </div>
+          </div>
+        </div>
+
+        <div class="param-block">
+          <label class="switch">
+            <input type="checkbox" formControlName="enableVibration" />
+            <span class="slider"></span>
+          </label>
+          <span class="label">Vibration</span>
+
+          <div class="one">
+            <div>
+              <div class="muted small">Max vibration</div>
+              <input type="number" step="0.1" formControlName="maxVibration" placeholder="Input" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>Notes</label>
+        <input formControlName="notes" placeholder="Take it easy!!!" />
+      </div>
+
+      <button class="btn save" type="submit" [disabled]="isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ editingIndex === null ? (isSaving ? 'Saving…' : 'Save/Update') : (isSaving ? 'Saving…' : 'Save/Update') }}
+      </button>
+    </form> -->
+  </div>
+
+  <div class="toast" [class.show]="showToast()">{{ toastMessage() }}</div>
+</div>

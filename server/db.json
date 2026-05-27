@@ -1,0 +1,994 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@mail.com",
+      "password": "admin",
+      "role": "ADMIN"
+    },
+    {
+      "id": 2,
+      "email": "driver@mail.com",
+      "password": "driver",
+      "role": "DRIVER"
+    },
+    {
+      "id": 3,
+      "email": "customer@mail.com",
+      "password": "customer",
+      "role": "CUSTOMER"
+    },
+    {
+      "id": 4,
+      "email": "operator@mail.com",
+      "password": "operator",
+      "role": "OPERATOR"
+    }
+  ],
+  "profiles": [
+    {
+      "id": 1,
+      "firstName": "María",
+      "lastName": "Lopez",
+      "avatarUrl": "https://i.pravatar.cc/150?img=1",
+      "phone": "+51 987654321",
+      "createdAt": "2025-10-09T08:00:00.000Z",
+      "updatedAt": "2025-10-09T08:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "firstName": "Carlos",
+      "lastName": "Ramos",
+      "avatarUrl": "https://i.pravatar.cc/150?img=2",
+      "phone": "+51 912345678",
+      "createdAt": "2025-10-09T08:05:00.000Z",
+      "updatedAt": "2025-10-09T08:05:00.000Z"
+    },
+    {
+      "id": 3,
+      "firstName": "Lucía",
+      "lastName": "Fernandez",
+      "avatarUrl": "https://i.pravatar.cc/150?img=3",
+      "phone": "+51 923456789",
+      "createdAt": "2025-10-09T08:10:00.000Z",
+      "updatedAt": "2025-10-09T08:10:00.000Z"
+    },
+    {
+      "id": 4,
+      "firstName": "Jorge",
+      "lastName": "Torres",
+      "avatarUrl": "https://i.pravatar.cc/150?img=4",
+      "phone": "+51 934567890",
+      "createdAt": "2025-10-09T08:15:00.000Z",
+      "updatedAt": "2025-10-09T08:15:00.000Z"
+    }
+  ],
+
+  "merchants": [
+    {
+      "id": 1,
+      "name": "Olva",
+      "contactEmail": "contact@olvaexpress.com",
+      "fiscalAddress": "Av. República de Panamá 3456, San Isidro, Lima, Peru",
+      "ruc": "20512345678",
+      "isActive": true,
+      "createdAt": "2025-10-09T08:30:00.000Z",
+      "usersId": [1, 2, 4]
+    }
+  ],
+
+  "alerts": [
+    {
+      "id": 1,
+      "type": "High Temperature",
+      "deliveryOrderId": "1",
+      "status": "Closed",
+      "createdAt": "2025-10-08T21:05:14.576Z",
+      "closedAt": "2025-10-08T21:05:26.457Z",
+      "description": "Temperature is greater than 8°C"
+    },
+    {
+      "id": 2,
+      "type": "Excessive vibration",
+      "deliveryOrderId": "2",
+      "status": "Closed",
+      "createdAt": "2025-10-08T21:41:00.224Z",
+      "closedAt": "2025-10-08T21:41:04.139Z",
+      "description": "Vibration is excessive"
+    },
+    {
+      "id": 3,
+      "type": "Energy Loss",
+      "deliveryOrderId": "2",
+      "status": "Closed",
+      "createdAt": "2025-10-08T21:41:04.464Z",
+      "closedAt": "2025-10-08T21:41:04.583Z",
+      "description": "The energy is low"
+    },
+    {
+      "id": 4,
+      "type": "Trip Loss",
+      "deliveryOrderId": "2",
+      "status": "Active",
+      "createdAt": "",
+      "closedAt": "",
+      "description": "Trip loss"
+    },
+    {
+      "id": 5,
+      "type": "Gate Loss",
+      "deliveryOrderId": "3",
+      "status": "Active",
+      "createdAt": "",
+      "closedAt": "",
+      "description": "The gate is loss"
+    }
+  ],
+  "subscription_plans": [],
+  "vehicles": [
+    {
+      "id": 2,
+      "plate": "FT-22",
+      "type": "Van",
+      "capabilities": ["Box"],
+      "status": "In Service",
+      "odometerKm": 110020,
+      "deviceImei": "IMEI-1234567"
+    }
+  ],
+  "devices": [
+    {
+      "id": 1,
+      "imei": "IMEI-8675309",
+      "type": "Temp + GPS",
+      "firmware": "v1.8.2",
+      "online": true,
+      "vehiclePlate": "TR-10"
+    },
+    {
+      "id": 2,
+      "imei": "IMEI-1234567",
+      "type": "GPS",
+      "firmware": "v1.1.0",
+      "online": false,
+      "vehiclePlate": "TR-09"
+    }
+  ],
+
+  "trips": [
+    {
+      "id": 1,
+      "statusId": 1,
+      "driverId": 101,
+      "coDriverId": 102,
+      "vehicleId": 12,
+      "createdAt": "2025-10-06T15:00:00.000Z",
+      "updatedAt": "2025-10-06T15:30:00.000Z",
+      "departureAt": "2025-10-06T16:00:00.000Z",
+      "merchantId": 501,
+      "originPointId": 1,
+      "polyline_encrypted": "a~l~Fjk~uOwHJy@P",
+      "totalDistanceKm": 120.5,
+      "totalDurationMin": 95
+    },
+    {
+      "id": 2,
+      "statusId": 2,
+      "driverId": 103,
+      "coDriverId": null,
+      "vehicleId": 14,
+      "createdAt": "2025-10-07T09:00:00.000Z",
+      "updatedAt": "2025-10-07T09:15:00.000Z",
+      "departureAt": null,
+      "merchantId": 502,
+      "originPointId": 2,
+      "polyline_encrypted": "udnnFjv~uPzLwK",
+      "totalDistanceKm": 86.2,
+      "totalDurationMin": 72
+    }
+  ],
+  "trip_parameters": [
+    {
+      "id": 1,
+      "tripId": 1,
+      "minTemperature": 2,
+      "maxTemperature": 8,
+      "minHumidity": 30,
+      "maxHumidity": 70,
+      "maxVibration": 5,
+      "trip": null
+    },
+    {
+      "id": 2,
+      "tripId": 2,
+      "minTemperature": 0,
+      "maxTemperature": 10,
+      "minHumidity": 20,
+      "maxHumidity": 65,
+      "maxVibration": 6,
+      "trip": null
+    }
+  ],
+  "origin_points": [
+    {
+      "id": 1,
+      "name": "Main Warehouse Lima",
+      "address": "Av. Industrial 1200, Callao, Lima, Peru",
+      "latitude": -12.0223,
+      "longitude": -77.1111
+    },
+    {
+      "id": 2,
+      "name": "Arequipa Distribution Center",
+      "address": "Av. Metropolitana 450, Cerro Colorado, Arequipa, Peru",
+      "latitude": -16.392,
+      "longitude": -71.547
+    }
+  ],
+  "delivery_orders": [
+    {
+      "id": 1,
+      "clientEmail": "juan.perez@mail.com",
+      "address": "Calle Los Pinos 340, Surco, Lima",
+      "latitude": -12.1453,
+      "longitude": -77.0034,
+      "sequenceOrder": 1,
+      "arrivalAt": "2025-10-06T17:45:00.000Z",
+      "notes": "Deliver to security gate",
+      "deliveryOrderStatusId": 1,
+      "realArrivalAt": "2025-10-06T17:47:00.000Z",
+      "maxHumidity": 70,
+      "minHumidity": 30,
+      "maxTemperature": 8,
+      "minTemperature": 2,
+      "maxVibration": 5,
+      "tripId": 1,
+      "trip": null
+    },
+    {
+      "id": 2,
+      "clientEmail": "empresa.alpha@mail.com",
+      "address": "Jr. Los Cedros 120, San Miguel, Lima",
+      "latitude": -12.082,
+      "longitude": -77.082,
+      "sequenceOrder": 2,
+      "arrivalAt": "2025-10-06T18:15:00.000Z",
+      "notes": "Handle with care",
+      "deliveryOrderStatusId": 2,
+      "realArrivalAt": null,
+      "maxHumidity": 65,
+      "minHumidity": 25,
+      "maxTemperature": 9,
+      "minTemperature": 3,
+      "maxVibration": 4,
+      "tripId": 1,
+      "trip": null
+    },
+    {
+      "id": 3,
+      "clientEmail": "maria.lopez@mail.com",
+      "address": "Av. Lambramani 800, Arequipa",
+      "latitude": -16.401,
+      "longitude": -71.535,
+      "sequenceOrder": 1,
+      "arrivalAt": "2025-10-07T10:00:00.000Z",
+      "notes": "Leave at reception",
+      "deliveryOrderStatusId": 1,
+      "realArrivalAt": null,
+      "maxHumidity": 60,
+      "minHumidity": 20,
+      "maxTemperature": 10,
+      "minTemperature": 1,
+      "maxVibration": 6,
+      "tripId": 2,
+      "trip": null
+    }
+  ],
+
+  "plans": [
+    { "id": "basic", "name": "BASIC", "price": 29, "currency": "PEN", "vehiclesLimit": 2 },
+    { "id": "standard", "name": "STANDARD", "price": 59, "currency": "PEN", "vehiclesLimit": 5 },
+    {
+      "id": "premium",
+      "name": "PREMIUM",
+      "price": 99,
+      "currency": "PEN",
+      "vehiclesLimit": "UNLIMITED"
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": 1,
+      "accountId": "1",
+      "planId": "standard",
+      "status": "ACTIVE",
+      "amount": 59,
+      "currency": "PEN",
+      "renewalDate": "2025-11-15",
+      "paymentMethodId": 1
+    }
+  ],
+  "paymentMethods": [
+    {
+      "id": 1,
+      "accountId": "1",
+      "brand": "Visa",
+      "last4": "1234",
+      "expMonth": 11,
+      "expYear": 2028,
+      "country": "United States",
+      "postalCode": "90210"
+    }
+  ],
+  "invoices": [
+    {
+      "id": 1001,
+      "subscriptionId": 1,
+      "date": "2025-11-15",
+      "amount": 59,
+      "currency": "PEN",
+      "status": "Pending",
+      "reference": null,
+      "receiptUrl": "https://example.com/receipts/1001.pdf"
+    },
+    {
+      "id": 1000,
+      "subscriptionId": 1,
+      "date": "2025-10-15",
+      "amount": 59,
+      "currency": "PEN",
+      "status": "Accepted",
+      "reference": "#PAY_8765",
+      "receiptUrl": "https://example.com/receipts/1000.pdf"
+    },
+    {
+      "id": 999,
+      "subscriptionId": 1,
+      "date": "2025-09-15",
+      "amount": 59,
+      "currency": "PEN",
+      "status": "Accepted",
+      "reference": "#PAY_6754",
+      "receiptUrl": "https://example.com/receipts/999.pdf"
+    }
+  ],
+
+  "analytics-trips": [
+    {
+      "id": "1",
+      "startDate": "2024-10-01T08:00:00.000Z",
+      "endDate": "2024-10-01T18:30:00.000Z",
+      "origin": "Lima, Perú",
+      "destination": "Arequipa, Perú",
+      "vehiclePlate": "ABC-123",
+      "driverName": "Juan Pérez",
+      "cargoType": "Productos Farmacéuticos",
+      "status": "COMPLETED",
+      "distance": 1015,
+      "alerts": ["alert-1"]
+    },
+    {
+      "id": "2",
+      "startDate": "2024-10-02T06:00:00.000Z",
+      "endDate": "2024-10-02T14:15:00.000Z",
+      "origin": "Callao, Perú",
+      "destination": "Trujillo, Perú",
+      "vehiclePlate": "DEF-456",
+      "driverName": "María García",
+      "cargoType": "Huevos Frescos",
+      "status": "COMPLETED",
+      "distance": 558,
+      "alerts": ["alert-2"]
+    },
+    {
+      "id": "3",
+      "startDate": "2024-10-03T09:00:00.000Z",
+      "endDate": "2024-10-03T17:45:00.000Z",
+      "origin": "Cusco, Perú",
+      "destination": "Lima, Perú",
+      "vehiclePlate": "GHI-789",
+      "driverName": "Carlos Mendoza",
+      "cargoType": "Lácteos",
+      "status": "IN_PROGRESS",
+      "distance": 1165,
+      "alerts": ["alert-3"]
+    },
+    {
+      "id": "4",
+      "startDate": "2024-09-28T07:30:00.000Z",
+      "endDate": "2024-09-28T16:45:00.000Z",
+      "origin": "Piura, Perú",
+      "destination": "Chiclayo, Perú",
+      "vehiclePlate": "JKL-012",
+      "driverName": "Ana Rodríguez",
+      "cargoType": "Vacunas",
+      "status": "COMPLETED",
+      "distance": 210,
+      "alerts": ["alert-4"]
+    },
+    {
+      "id": "5",
+      "startDate": "2024-09-25T05:00:00.000Z",
+      "endDate": "2024-09-25T15:20:00.000Z",
+      "origin": "Iquitos, Perú",
+      "destination": "Tarapoto, Perú",
+      "vehiclePlate": "MNO-345",
+      "driverName": "Luis Torres",
+      "cargoType": "Frutas Tropicales",
+      "status": "COMPLETED",
+      "distance": 365,
+      "alerts": ["alert-5"]
+    },
+    {
+      "id": "6",
+      "startDate": "2024-10-04T07:00:00.000Z",
+      "endDate": "2024-10-04T19:00:00.000Z",
+      "origin": "Arequipa, Perú",
+      "destination": "Tacna, Perú",
+      "vehiclePlate": "PQR-678",
+      "driverName": "Sofía Ramos",
+      "cargoType": "Carne Congelada",
+      "status": "IN_PROGRESS",
+      "distance": 380,
+      "alerts": ["alert-6", "alert-7"]
+    },
+    {
+      "id": "7",
+      "startDate": "2024-10-05T05:30:00.000Z",
+      "endDate": "2024-10-05T17:20:00.000Z",
+      "origin": "Chiclayo, Perú",
+      "destination": "Lima, Perú",
+      "vehiclePlate": "STU-901",
+      "driverName": "Diego Fernández",
+      "cargoType": "Pescado Fresco",
+      "status": "PLANNED",
+      "distance": 770,
+      "alerts": []
+    }
+  ],
+  "analytics-alerts": [
+    {
+      "id": "alert-1",
+      "tripId": "1",
+      "deviceId": "IOT-001",
+      "vehiclePlate": "ABC-123",
+      "type": "TEMPERATURE",
+      "severity": "HIGH",
+      "timestamp": "2024-10-01T12:30:00.000Z",
+      "location": {
+        "latitude": -16.409,
+        "longitude": -71.5375,
+        "address": "Carretera Panamericana Sur, Arequipa"
+      },
+      "sensorData": {
+        "temperature": 12.5,
+        "timestamp": "2024-10-01T12:30:00.000Z"
+      },
+      "resolved": true
+    },
+    {
+      "id": "alert-2",
+      "tripId": "2",
+      "deviceId": "IOT-002",
+      "vehiclePlate": "DEF-456",
+      "type": "MOVEMENT",
+      "severity": "MEDIUM",
+      "timestamp": "2024-10-02T10:15:00.000Z",
+      "location": {
+        "latitude": -8.1116,
+        "longitude": -79.029,
+        "address": "Carretera Panamericana Norte, La Libertad"
+      },
+      "sensorData": {
+        "movement": {
+          "acceleration": { "x": 2.5, "y": 1.8, "z": 3.2 },
+          "intensity": 7.5
+        },
+        "timestamp": "2024-10-02T10:15:00.000Z"
+      },
+      "resolved": true
+    },
+    {
+      "id": "alert-3",
+      "tripId": "3",
+      "deviceId": "IOT-003",
+      "vehiclePlate": "GHI-789",
+      "type": "TEMPERATURE",
+      "severity": "CRITICAL",
+      "timestamp": "2024-10-03T11:45:00.000Z",
+      "location": {
+        "latitude": -12.0464,
+        "longitude": -77.0428,
+        "address": "Lima, Perú"
+      },
+      "sensorData": {
+        "temperature": 18.2,
+        "timestamp": "2024-10-03T11:45:00.000Z"
+      },
+      "resolved": false
+    },
+    {
+      "id": "alert-4",
+      "tripId": "4",
+      "deviceId": "IOT-004",
+      "vehiclePlate": "JKL-012",
+      "type": "TEMPERATURE",
+      "severity": "HIGH",
+      "timestamp": "2024-09-28T13:20:00.000Z",
+      "location": {
+        "latitude": -6.7014,
+        "longitude": -79.9065,
+        "address": "Chiclayo, Lambayeque"
+      },
+      "sensorData": {
+        "temperature": 10.8,
+        "timestamp": "2024-09-28T13:20:00.000Z"
+      },
+      "resolved": true
+    },
+    {
+      "id": "alert-5",
+      "tripId": "5",
+      "deviceId": "IOT-005",
+      "vehiclePlate": "MNO-345",
+      "type": "MOVEMENT",
+      "severity": "LOW",
+      "timestamp": "2024-09-25T09:30:00.000Z",
+      "location": {
+        "latitude": -6.4869,
+        "longitude": -76.3626,
+        "address": "Tarapoto, San Martín"
+      },
+      "sensorData": {
+        "movement": {
+          "acceleration": { "x": 1.2, "y": 0.8, "z": 1.5 },
+          "intensity": 3.5
+        },
+        "timestamp": "2024-09-25T09:30:00.000Z"
+      },
+      "resolved": true
+    },
+    {
+      "id": "alert-6",
+      "tripId": "6",
+      "deviceId": "IOT-006",
+      "vehiclePlate": "PQR-678",
+      "type": "DOOR_OPEN",
+      "severity": "MEDIUM",
+      "timestamp": "2024-10-04T10:00:00.000Z",
+      "location": {
+        "latitude": -17.991,
+        "longitude": -70.2465,
+        "address": "Moquegua, Perú"
+      },
+      "sensorData": {
+        "door": { "status": "OPEN" },
+        "timestamp": "2024-10-04T10:00:00.000Z"
+      },
+      "resolved": false
+    },
+    {
+      "id": "alert-7",
+      "tripId": "6",
+      "deviceId": "IOT-006",
+      "vehiclePlate": "PQR-678",
+      "type": "HUMIDITY",
+      "severity": "HIGH",
+      "timestamp": "2024-10-04T13:15:00.000Z",
+      "location": {
+        "latitude": -17.791,
+        "longitude": -70.1465,
+        "address": "Carretera Panamericana Sur, Tacna"
+      },
+      "sensorData": {
+        "humidity": 85,
+        "timestamp": "2024-10-04T13:15:00.000Z"
+      },
+      "resolved": false
+    }
+  ],
+  "incidentsByMonth": [
+    {
+      "id": 1,
+      "month": "Enero",
+      "year": 2024,
+      "temperatureIncidents": 6,
+      "movementIncidents": 4,
+      "totalIncidents": 10,
+      "incidents": [
+        {
+          "timestamp": "2024-01-08T09:15:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-01-15T14:30:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-01-22T11:45:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-01-28T16:20:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "MOVEMENT"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "month": "Febrero",
+      "year": 2024,
+      "temperatureIncidents": 4,
+      "movementIncidents": 6,
+      "totalIncidents": 10,
+      "incidents": [
+        {
+          "timestamp": "2024-02-05T10:20:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-02-12T13:40:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-02-18T15:15:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-02-25T09:30:00.000Z",
+          "vehiclePlate": "VWX-234",
+          "deviceId": "IOT-008",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "month": "Marzo",
+      "year": 2024,
+      "temperatureIncidents": 8,
+      "movementIncidents": 3,
+      "totalIncidents": 11,
+      "incidents": [
+        {
+          "timestamp": "2024-03-07T08:45:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-03-15T10:30:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-03-20T14:15:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-03-28T12:00:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "month": "Abril",
+      "year": 2024,
+      "temperatureIncidents": 5,
+      "movementIncidents": 7,
+      "totalIncidents": 12,
+      "incidents": [
+        {
+          "timestamp": "2024-04-03T11:20:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-04-10T09:45:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-04-18T16:20:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-04-25T13:10:00.000Z",
+          "vehiclePlate": "VWX-234",
+          "deviceId": "IOT-008",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "month": "Mayo",
+      "year": 2024,
+      "temperatureIncidents": 3,
+      "movementIncidents": 9,
+      "totalIncidents": 12,
+      "incidents": [
+        {
+          "timestamp": "2024-05-05T11:30:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-05-12T14:45:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-05-19T10:15:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-05-26T15:30:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "MOVEMENT"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "month": "Junio",
+      "year": 2024,
+      "temperatureIncidents": 7,
+      "movementIncidents": 2,
+      "totalIncidents": 9,
+      "incidents": [
+        {
+          "timestamp": "2024-06-02T09:10:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-06-10T12:30:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-06-18T16:45:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-06-25T11:20:00.000Z",
+          "vehiclePlate": "VWX-234",
+          "deviceId": "IOT-008",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "month": "Julio",
+      "year": 2024,
+      "temperatureIncidents": 9,
+      "movementIncidents": 4,
+      "totalIncidents": 13,
+      "incidents": [
+        {
+          "timestamp": "2024-07-04T08:30:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-07-11T13:15:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-07-18T10:45:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-07-25T15:20:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "month": "Agosto",
+      "year": 2024,
+      "temperatureIncidents": 4,
+      "movementIncidents": 8,
+      "totalIncidents": 12,
+      "incidents": [
+        {
+          "timestamp": "2024-08-06T09:25:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-08-13T14:10:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-08-20T11:55:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-08-27T16:30:00.000Z",
+          "vehiclePlate": "VWX-234",
+          "deviceId": "IOT-008",
+          "type": "MOVEMENT"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "month": "Septiembre",
+      "year": 2024,
+      "temperatureIncidents": 6,
+      "movementIncidents": 3,
+      "totalIncidents": 9,
+      "incidents": [
+        {
+          "timestamp": "2024-09-05T10:40:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-09-12T13:25:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-09-19T09:15:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-09-26T15:50:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "month": "Octubre",
+      "year": 2024,
+      "temperatureIncidents": 5,
+      "movementIncidents": 7,
+      "totalIncidents": 12,
+      "incidents": [
+        {
+          "timestamp": "2024-10-01T12:30:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-10-08T14:15:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-10-15T10:45:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-10-22T16:20:00.000Z",
+          "vehiclePlate": "VWX-234",
+          "deviceId": "IOT-008",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "month": "Noviembre",
+      "year": 2024,
+      "temperatureIncidents": 3,
+      "movementIncidents": 5,
+      "totalIncidents": 8,
+      "incidents": [
+        {
+          "timestamp": "2024-11-02T09:20:00.000Z",
+          "vehiclePlate": "ABC-123",
+          "deviceId": "IOT-001",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-11-10T13:40:00.000Z",
+          "vehiclePlate": "DEF-456",
+          "deviceId": "IOT-002",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-11-18T11:15:00.000Z",
+          "vehiclePlate": "GHI-789",
+          "deviceId": "IOT-003",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-11-25T15:35:00.000Z",
+          "vehiclePlate": "JKL-012",
+          "deviceId": "IOT-004",
+          "type": "TEMPERATURE"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "month": "Diciembre",
+      "year": 2024,
+      "temperatureIncidents": 2,
+      "movementIncidents": 3,
+      "totalIncidents": 5,
+      "incidents": [
+        {
+          "timestamp": "2024-12-05T10:30:00.000Z",
+          "vehiclePlate": "MNO-345",
+          "deviceId": "IOT-005",
+          "type": "TEMPERATURE"
+        },
+        {
+          "timestamp": "2024-12-12T14:20:00.000Z",
+          "vehiclePlate": "PQR-678",
+          "deviceId": "IOT-006",
+          "type": "MOVEMENT"
+        },
+        {
+          "timestamp": "2024-12-19T09:45:00.000Z",
+          "vehiclePlate": "STU-901",
+          "deviceId": "IOT-007",
+          "type": "MOVEMENT"
+        }
+      ]
+    }
+  ]
+}

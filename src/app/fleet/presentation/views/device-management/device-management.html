@@ -1,0 +1,82 @@
+<div class="dm-header">
+  <h1 class="dm-title">IoT Devices</h1>
+  <button mat-raised-button color="primary" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    Register Device
+  </button>
+</div>
+
+<div class="dm-toolbar">
+  <mat-form-field appearance="outline" class="dm-search">
+    <mat-label>Search by IMEI or vehicle…</mat-label>
+    <input matInput (input)="applySearch($any($event.target).value)">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="dm-filter">
+    <mat-label>All states</mat-label>
+    <mat-select [value]="''" (selectionChange)="applyState($event.value)">
+      <mat-option value="">All states</mat-option>
+      <mat-option value="Online">Online</mat-option>
+      <mat-option value="Offline">Offline</mat-option>
+      <mat-option value="Not synced">Not synced</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<!-- Create / Edit form
+<app-device-create-and-edit
+  [editMode]="editMode"
+  [data]="formData"
+  (cancelRequested)="cancel()"
+  (addRequested)="add($event)"
+  (updateRequested)="update($event)">
+</app-device-create-and-edit>-->
+
+<!-- List -->
+<div class="mt table mat-elevation-z1">
+  <table mat-table [dataSource]="dataSource" matSort>
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+      <td mat-cell *matCellDef="let r">{{ r.id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="imei">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>IMEI</th>
+      <td mat-cell *matCellDef="let r">{{ r.imei }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="online">
+      <th mat-header-cell *matHeaderCellDef >Connectivity</th>
+      <td mat-cell *matCellDef="let r">{{ r.online ? 'Online' : 'Offline' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="vehiclePlate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Vehicle</th>
+      <td mat-cell *matCellDef="let r">{{ r.vehiclePlate || '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="actions-col">Actions</th>
+      <td mat-cell *matCellDef="let r" class="actions-col">
+        <div class="actions-wrap">
+          <button mat-icon-button matTooltip="View" (click)="onView(r)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" matTooltip="Edit" (click)="onEdit(r)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Delete" (click)="onDelete(r)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5,10,20]" [pageSize]="5" showFirstLastButtons></mat-paginator>
+</div>

@@ -1,0 +1,6 @@
+export enum AlertType {
+  TEMPERATURE = 'TEMPERATURE',
+  MOVEMENT = 'MOVEMENT',
+  HUMIDITY = 'HUMIDITY',
+  LOCATION = 'LOCATION'
+}

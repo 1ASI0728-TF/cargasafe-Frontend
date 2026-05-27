@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Assign to vehicle</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Vehicle</mat-label>
+    <mat-select [(value)]="selectedId">
+      <mat-option *ngFor="let v of vehicles" [value]="v.id">
+        {{ v.plate }} — {{ v.type }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="ok()" [disabled]="!selectedId">Assign</button>
+</mat-dialog-actions>

@@ -1,0 +1,85 @@
+<div class="trips-table">
+  <div class="trips-table__header">
+    <h2>Trip Records</h2>
+    <div class="trips-table__filters">
+      <input 
+        type="text" 
+        placeholder="Search by plate, driver or destination..." 
+        [(ngModel)]="searchTerm"
+        (input)="applyFilters()"
+        class="search-input">
+      
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()" class="status-filter">
+        <option value="">All statuses</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled</option>
+        <option value="DELAYED">Delayed</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="trips-table__content" *ngIf="!loading; else loadingTemplate">
+    <table class="table">
+      <thead>
+        <tr>
+          <th (click)="sort('vehiclePlate')">
+            Plate
+            <span class="sort-indicator" [class.active]="sortField === 'vehiclePlate'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th (click)="sort('driverName')">
+            Driver
+            <span class="sort-indicator" [class.active]="sortField === 'driverName'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th (click)="sort('origin')">Origin</th>
+          <th (click)="sort('destination')">Destination</th>
+          <th (click)="sort('cargoType')">Cargo Type</th>
+          <th (click)="sort('startDate')">
+            Start Date
+            <span class="sort-indicator" [class.active]="sortField === 'startDate'">
+              {{ sortDirection === 'asc' ? '↑' : '↓' }}
+            </span>
+          </th>
+          <th (click)="sort('status')">Status</th>
+          <th (click)="sort('distance')">Distance (km)</th>
+          <th>Alerts</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let trip of filteredTrips" class="table-row">
+          <td class="vehicle-plate">{{ trip.vehiclePlate }}</td>
+          <td>{{ trip.driverName }}</td>
+          <td>{{ trip.origin }}</td>
+          <td>{{ trip.destination }}</td>
+          <td>{{ trip.cargoType }}</td>
+          <td>{{ trip.startDate | date:'short' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(trip.status)">
+              {{ getStatusText(trip.status) }}
+            </span>
+          </td>
+          <td>{{ trip.distance | number:'1.0-0' }}</td>
+          <td>
+            <span class="alerts-count" [ngClass]="{'has-alerts': trip.alerts.length > 0}">
+              {{ trip.alerts.length }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredTrips.length === 0" class="no-data">
+      <p>No trips found matching the applied filters.</p>
+    </div>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading">
+      <p>Loading trips...</p>
+    </div>
+  </ng-template>
+</div>

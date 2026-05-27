@@ -1,0 +1,55 @@
+<div class="card">
+  <h3>{{ editMode ? 'Edit Vehicle' : 'Add Vehicle' }}</h3>
+
+  <div class="grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Plate</mat-label>
+      <input matInput [(ngModel)]="data.plate" [readonly]="editMode"/>
+      <mat-hint *ngIf="editMode">Plate cannot be edited</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="data.type">
+        <mat-option *ngFor="let t of vehicleTypes" [value]="t">{{ t.replaceAll('_',' ') | titlecase }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="col-2">
+      <div class="label">Capabilities</div>
+      <mat-chip-set>
+        <mat-chip-option
+          *ngFor="let c of caps"
+          [selected]="isSelected(c)"
+          (selectionChange)="onChipSelectionChange(c, $event)">
+          {{ c.replaceAll('_',' ') | titlecase }}
+        </mat-chip-option>
+      </mat-chip-set>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="data.status">
+        <mat-option *ngFor="let s of statuses" [value]="s">{{ s.replaceAll('_',' ') | titlecase }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Odometer (km)</mat-label>
+      <input type="number" matInput [(ngModel)]="data.odometerKm" />
+    </mat-form-field>
+
+    <!-- IMEIs input
+    <mat-form-field appearance="outline">
+      <mat-label>IoT Device IMEIs (comma or space separated)</mat-label>
+      <input matInput [(ngModel)]="imeisText" />
+    </mat-form-field>-->
+  </div>
+
+  <div class="actions">
+    <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="submit()">
+      {{ editMode ? 'Update' : 'Create' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,304 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  body {
+    overflow: auto;
+  }
+}
+
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+}
+
+.left-panel {
+  flex: 0 0 35%;
+  background: #FF9333;
+  padding: 45px 50px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: 90px;
+  margin-bottom: 0;
+}
+
+.logo-icon {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 52px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 70px;
+  margin-left: 50px;
+}
+
+.title {
+  font-size: 45px;
+  font-weight: 700;
+  margin: 0 0 28px 0;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 25px;
+  line-height: 1.65;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.right-panel {
+  flex: 1;
+  background: white;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 80px 280px 50px 80px;
+  overflow-y: auto;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+
+.back-to-login {
+  font-size: 17px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 35px;
+  display: inline-block;
+}
+
+.back-to-login:hover {
+  color: #FF9333;
+}
+
+.arrow {
+  margin-right: 5px;
+}
+
+.welcome-title {
+  font-size: 70px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.welcome-subtitle {
+  font-size: 19px;
+  color: #666;
+  margin: 0 0 38px 0;
+  font-weight: 400;
+}
+
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-section {
+  margin-bottom: 20px;
+  padding-top: 10px;
+}
+
+.section-title {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.full-width-input {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-row-field {
+  flex: 1;
+}
+
+.radio-group-mat {
+  display: flex;
+  gap: 30px;
+}
+
+.radio-label-mat {
+  font-size: 17px;
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-outer-circle,
+::ng-deep .mat-radio-button.mat-accent .mat-radio-inner-circle {
+  border-color: #FF9333 !important;
+}
+
+::ng-deep .mat-radio-button.mat-accent .mat-radio-checked .mat-radio-inner-circle {
+  background-color: #FF9333 !important;
+}
+
+.terms-acceptance-mat {
+  margin-bottom: 30px;
+}
+
+.terms-checkbox {
+  font-size: 14px;
+}
+
+.btn-signin-mat {
+  width: 100% !important;
+  height: 60px !important;
+  padding: 15px 0 !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: white !important;
+  background-color: #FF9333 !important;
+  border-radius: 5px !important;
+  transition: transform 0.2s, box-shadow 0.3s;
+  margin-bottom: 22px;
+  line-height: normal !important;
+}
+
+.btn-signin-mat:hover {
+  background-color: #e67a1a !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(255, 147, 51, 0.4) !important;
+}
+
+.btn-signin-mat:active {
+  transform: translateY(0) !important;
+}
+
+.signup-link {
+  color: #FF9333;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.signup-link:hover {
+  color: #e67a1a;
+}
+
+::ng-deep .mat-form-field-outline-thick {
+  color: #FF9333 !important;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .right-panel {
+    padding-right: 180px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .login-container { height: auto; }
+
+  .left-panel {
+    flex: 0 0 40%;
+    padding: 40px 45px;
+  }
+
+  .right-panel {
+    padding: 60px;
+
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-row-field {
+    width: 100%;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .description {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    flex: 0 0 auto;
+    min-height: 280px;
+    padding: 35px 40px;
+    justify-content: flex-start;
+  }
+
+  .logo-container {
+    flex-direction: column;
+    margin-bottom: 50px;
+  }
+
+  .content {
+    margin-left: 0;
+    margin-top: 0;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .right-panel {
+    flex: 1;
+    padding: 40px;
+    width: 100%;
+  }
+
+  .form-container {
+    max-width: 100%;
+    margin: 0;
+  }
+}
+
+

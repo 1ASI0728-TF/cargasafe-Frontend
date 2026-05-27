@@ -1,0 +1,136 @@
+<div class="trip-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading trip details...</p>
+    </div>
+  </div>
+
+  <!-- Trip Detail Content -->
+  <div *ngIf="!loading && trip" class="content-container">
+    <!-- Page Title -->
+    <div class="page-title-section">
+      <h1 class="page-title">Dashboard - Cargo Monitoring</h1>
+      <p class="page-subtitle">Visualization and analysis of trips, incidents and alerts from CargaSafe system</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="main-card">
+      
+      <!-- Header with Trip Details -->
+      <div class="trip-header">
+        <div class="header-title">
+          <mat-icon class="header-icon">inventory_2</mat-icon>
+          <h1>Trip Details</h1>
+        </div>
+
+        <!-- Trip Info Grid -->
+        <div class="trip-info-grid">
+          <div class="info-item">
+            <span class="info-label">Driver:</span>
+            <span class="info-value">{{ trip.driverName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Cargo:</span>
+            <span class="info-value">{{ trip.cargoType }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Trip start:</span>
+            <span class="info-value">{{ formatDateTime(trip.startDate) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Route:</span>
+            <span class="info-value">{{ trip.origin }} – {{ trip.destination }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Distance traveled:</span>
+            <span class="info-value">{{ trip.distance }} km</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Trip end:</span>
+            <span class="info-value">{{ formatDateTime(trip.endDate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-container">
+        
+        <!-- Temperature Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <mat-icon>thermostat</mat-icon>
+            <h2>Temperature vs Time</h2>
+          </div>
+          
+          <ngx-charts-line-chart
+            [view]="view"
+            [scheme]="temperatureColorScheme"
+            [results]="temperatureChartData"
+            [gradient]="gradient"
+            [xAxis]="showXAxis"
+            [yAxis]="showYAxis"
+            [legend]="false"
+            [showXAxisLabel]="showXAxisLabel"
+            [showYAxisLabel]="showYAxisLabel"
+            [xAxisLabel]="xAxisLabel"
+            [yAxisLabel]="yAxisLabelTemp"
+            [autoScale]="autoScale">
+          </ngx-charts-line-chart>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-line temp-line"></div>
+              <span>Temperature (°C)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line upper-limit"></div>
+              <span>Upper Limit (8°C)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line lower-limit"></div>
+              <span>Lower Limit (2°C)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vibration Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <mat-icon>vibration</mat-icon>
+            <h2>Vibration vs Time</h2>
+          </div>
+          
+          <ngx-charts-line-chart
+            [view]="view"
+            [scheme]="vibrationColorScheme"
+            [results]="vibrationChartData"
+            [gradient]="gradient"
+            [xAxis]="showXAxis"
+            [yAxis]="showYAxis"
+            [legend]="false"
+            [showXAxisLabel]="showXAxisLabel"
+            [showYAxisLabel]="showYAxisLabel"
+            [xAxisLabel]="xAxisLabel"
+            [yAxisLabel]="yAxisLabelVib"
+            [autoScale]="autoScale">
+          </ngx-charts-line-chart>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-box safe-zone"></div>
+              <span>Safe Zone</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line vibration-line"></div>
+              <span>Detected Vibration (g)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- End Trip Detail Content -->
+</div>

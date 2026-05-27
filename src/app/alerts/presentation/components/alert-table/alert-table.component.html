@@ -1,0 +1,141 @@
+<div class="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Search alerts</mat-label>
+    <input
+      matInput
+      type="text"
+      placeholder=""
+      (keyup)="applySearch($event)"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select (selectionChange)="filterByStatus($event.value)">
+      <mat-option value="">All</mat-option>
+      <mat-option value="Open">Open</mat-option>
+      <mat-option value="Acknowledged">Acknowledged</mat-option>
+      <mat-option value="Closed">Closed</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<div class="mat-elevation-z2">
+  <table mat-table [dataSource]="dataSource" matSort class="full-width-table">
+
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+      <td mat-cell *matCellDef="let alert">{{ alert.id }}</td>
+    </ng-container>
+
+    <!-- Type Column -->
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+      <td mat-cell *matCellDef="let alert">{{ alert.alertType }}</td>
+    </ng-container>
+
+    <!-- Delivery Order ID -->
+    <ng-container matColumnDef="deliveryOrderId">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Delivery Order ID</th>
+      <td mat-cell *matCellDef="let alert">{{ alert.deliveryOrderId }}</td>
+    </ng-container>
+
+    <!-- Status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let alert">
+        <span [ngClass]="alert.alertStatus === 'OPEN' ? 'open' : 'closed'">
+          {{ alert.alertStatus }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Created -->
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+      <td mat-cell *matCellDef="let alert">
+        {{ alert.incidents?.length ? (alert.incidents[0].createdAt | date:'long') : '---' }}
+      </td>
+    </ng-container>
+
+    <!-- Closed -->
+    <ng-container matColumnDef="closedAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Closed</th>
+      <td mat-cell *matCellDef="let alert">
+        {{ alert.incidents?.length && alert.incidents[0].closedAt ? (alert.incidents[0].closedAt | date:'long') : '---' }}
+      </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let alert">
+        <button
+          mat-raised-button
+          class="mark-resolved-btn"
+          [disabled]="!alert.viewed"
+          [ngClass]="{'disabled-btn': !alert.viewed}"
+          *ngIf="alert.alertStatus !== 'CLOSED'"
+          (click)="markAsResolved(alert.id)"
+        >
+          {{ alert.viewed ? 'Mark as resolved' : 'View first' }}
+        </button>
+
+        <ng-template [ngIf]="alert.alertStatus === 'CLOSED'">
+        <span class="resolved-text">
+        <mat-icon color="primary">check_circle</mat-icon>
+        Resolved
+        </span>
+        </ng-template>
+      </td>
+    </ng-container>
+
+    <!-- Details -->
+    <ng-container matColumnDef="details">
+      <th mat-header-cell *matHeaderCellDef>Details</th>
+      <td mat-cell *matCellDef="let alert">
+        <button mat-icon-button color="primary" (click)="openDetails(alert)">
+          <mat-icon>search</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Header and Row -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons>
+  </mat-paginator>
+</div>
+
+<div class="overlay" *ngIf="selectedAlert">
+  <div class="popup">
+    <div class="popup-header">
+      <h3>Alert Details</h3>
+      <button class="close-btn" (click)="closeDetails()">✕</button>
+    </div>
+
+    <div class="popup-body">
+      <p><strong>Type:</strong> {{ selectedAlert.alertType }}</p>
+      <p><strong>Status:</strong>
+        <span [ngClass]="selectedAlert.alertStatus === 'OPEN' ? 'open' : 'closed'">
+          {{ selectedAlert.alertStatus }}
+        </span>
+      </p>
+
+      <ng-container *ngIf="selectedAlert.incidents?.length">
+        <p><strong>Created:</strong> {{ selectedAlert.incidents[0].createdAt | date:'long' }}</p>
+        <p><strong>Closed:</strong> {{ selectedAlert.incidents[0].closedAt ? (selectedAlert.incidents[0].closedAt | date:'long') : '---' }}</p>
+        <p><strong>Description:</strong> {{ selectedAlert.incidents[0].description }}</p>
+      </ng-container>
+
+      <div class="popup-footer">
+        <button class="details-btn">
+          Ver más detalles
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,3 @@
+.content { display: flex; flex-direction: column; gap: 12px; }
+.search { width: 100%; }
+.table { border-radius: 12px; overflow: hidden; }

@@ -1,0 +1,104 @@
+<div class="incidents-chart">
+  <div class="incidents-chart__header">
+    <h2>Monthly Incidents</h2>
+    <div class="chart-filters">
+      <div class="date-range-filters">
+        <label for="startDate">Start Date:</label>
+        <input 
+          id="startDate"
+          type="date" 
+          [(ngModel)]="startDate"
+          (change)="filterByDateRange()"
+          class="date-filter">
+        
+        <label for="endDate">End Date:</label>
+        <input 
+          id="endDate"
+          type="date" 
+          [(ngModel)]="endDate"
+          (change)="filterByDateRange()"
+          class="date-filter">
+      </div>
+      
+      <select [(ngModel)]="alertTypeFilter" (change)="filterByAlertType()" class="alert-type-filter">
+        <option value="">All types</option>
+        <option value="TEMPERATURE">Temperature</option>
+        <option value="MOVEMENT">Movement</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="incidents-chart__content" *ngIf="!loading; else loadingTemplate">
+    <div class="chart-container">
+      <canvas 
+        #chartCanvas
+        class="chart-canvas"
+        (mousemove)="onMouseMove($event)"
+        (mouseleave)="hideTooltip()">
+      </canvas>
+      
+      <!-- Tooltip -->
+      <div 
+        class="chart-tooltip" 
+        [style.display]="tooltipVisible ? 'block' : 'none'"
+        [style.left.px]="tooltipX"
+        [style.top.px]="tooltipY">
+        <div class="tooltip-content" *ngIf="tooltipData">
+          <h4>{{ tooltipData.month }} {{ tooltipData.year }}</h4>
+          <div class="tooltip-incidents">
+            <div class="incident-item">
+              <span class="incident-type temperature">Temperature:</span>
+              <span class="incident-count">{{ tooltipData.temperatureIncidents }}</span>
+            </div>
+            <div class="incident-item">
+              <span class="incident-type movement">Movement:</span>
+              <span class="incident-count">{{ tooltipData.movementIncidents }}</span>
+            </div>
+            <div class="incident-total">
+              <strong>Total: {{ tooltipData.totalIncidents }}</strong>
+            </div>
+          </div>
+          
+          <!-- Incident Details -->
+          <div class="incident-details" *ngIf="tooltipData.incidents.length > 0">
+            <h5>Incident Details:</h5>
+            <div class="incident-list">
+              <div 
+                class="incident-detail" 
+                *ngFor="let incident of tooltipData.incidents.slice(0, 3)">
+                <div class="incident-info">
+                  <span class="incident-date">{{ incident.timestamp | date:'short' }}</span>
+                  <span class="incident-vehicle">{{ incident.vehiclePlate }}</span>
+                  <span class="incident-device">IOT: {{ incident.deviceId }}</span>
+                  <span class="incident-type-badge" [ngClass]="incident.type.toLowerCase()">
+                    {{ getAlertTypeText(incident.type) }}
+                  </span>
+                </div>
+              </div>
+              <div *ngIf="tooltipData.incidents.length > 3" class="more-incidents">
+                +{{ tooltipData.incidents.length - 3 }} more...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-legend">
+      <div class="legend-item">
+        <div class="legend-color temperature"></div>
+        <span>Temperature Incidents</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color movement"></div>
+        <span>Movement Incidents</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading">
+      <p>Loading chart data...</p>
+    </div>
+  </ng-template>
+</div>

@@ -1,0 +1,22 @@
+<h2 class="crv-title">
+  Retire vehicle {{ data.plate }}?
+</h2>
+
+<p class="crv-text">
+  Are you sure you want to retire this vehicle?
+</p>
+
+<p class="crv-hint">
+  Once a vehicle is set to <strong>RETIRED</strong>, its status cannot be
+  changed again. You will only be able to delete it from the fleet and it will not be able to assign any devices..
+</p>
+
+<div class="crv-actions">
+  <button mat-stroked-button (click)="cancel()">
+    Cancel
+  </button>
+
+  <button mat-raised-button color="warn" (click)="confirm()">
+    Yes, retire vehicle
+  </button>
+</div>

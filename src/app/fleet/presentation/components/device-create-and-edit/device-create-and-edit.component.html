@@ -1,0 +1,29 @@
+<div class="card">
+  <h3>{{ editMode ? 'Edit Device' : 'Register Device' }}</h3>
+
+  <div class="grid">
+    <mat-form-field *ngIf="!editMode" appearance="outline">
+      <mat-label>IMEI</mat-label>
+      <input matInput [(ngModel)]="data.imei" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Firmware</mat-label>
+      <input matInput [(ngModel)]="data.firmware" />
+    </mat-form-field>
+
+    <!--<mat-form-field appearance="outline">
+      <mat-label>Vehicle Plate (optional)</mat-label>
+      <input matInput [(ngModel)]="data.vehiclePlate" />
+    </mat-form-field>-->
+
+    <mat-checkbox [(ngModel)]="data.online">Online</mat-checkbox>
+  </div>
+
+  <div class="actions">
+    <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="submit()">
+      {{ editMode ? 'Update' : 'Create' }}
+    </button>
+  </div>
+</div>

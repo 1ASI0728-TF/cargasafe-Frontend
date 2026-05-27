@@ -1,0 +1,27 @@
+.dialog-container {
+  text-align: center;
+  padding: 24px;
+}
+
+.dialog-icon mat-icon {
+  font-size: 48px;
+  color: #c62828;
+}
+
+.dialog-title {
+  font-size: 20px;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+.dialog-message {
+  margin: 16px 0;
+  color: #444;
+  font-size: 15px;
+}
+
+.dialog-status {
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #555;
+}

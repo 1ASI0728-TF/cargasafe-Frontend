@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Unassign IoT Device</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>IMEI</mat-label>
+    <mat-select [(ngModel)]="selectedImei">
+      <mat-option *ngFor="let imei of data.imeis" [value]="imei">{{ imei }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="close()">Cancel</button>
+  <button mat-raised-button color="warn" (click)="unassign()" [disabled]="!selectedImei">Unassign</button>
+</mat-dialog-actions>

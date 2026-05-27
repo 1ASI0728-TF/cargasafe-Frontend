@@ -1,0 +1,63 @@
+<section class="trips-summary">
+  <!-- LOADING -->
+  @if (summaryState().loading()) {
+  <div class="summary-group skeleton"></div>
+  <div class="summary-group skeleton"></div>
+  }
+
+  <!-- ERROR -->
+  @else if (summaryState().error()) {
+  <div class="error">
+    {{ summaryState().error() }}
+  </div>
+  }
+
+  <!-- SUCCESS -->
+  @else if (summaryState().data()) {
+
+  <div class="summary-group">
+    <h3>Total trips</h3>
+    <div class="summary-values">
+      <div class="summary-value">
+        <span class="summary-value-field">Today</span>
+        <span>{{ summaryState().data()?.totalTrips?.today }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Yesterday</span>
+        <span>{{ summaryState().data()?.totalTrips?.yesterday }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Last 7 Days</span>
+        <span>{{ summaryState().data()?.totalTrips?.last7Days }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Last Year</span>
+        <span>{{ summaryState().data()?.totalTrips?.lastYear }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="summary-group">
+    <h3>Total incidents</h3>
+    <div class="summary-values">
+      <div class="summary-value">
+        <span class="summary-value-field">Today</span>
+        <span>{{ summaryState().data()?.totalIncidents?.today }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Yesterday</span>
+        <span>{{ summaryState().data()?.totalIncidents?.yesterday }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Last 7 Days</span>
+        <span>{{ summaryState().data()?.totalIncidents?.last7Days }}</span>
+      </div>
+      <div class="summary-value">
+        <span class="summary-value-field">Last Year</span>
+        <span>{{ summaryState().data()?.totalIncidents?.lastYear }}</span>
+      </div>
+    </div>
+  </div> -->
+
+  }
+</section>

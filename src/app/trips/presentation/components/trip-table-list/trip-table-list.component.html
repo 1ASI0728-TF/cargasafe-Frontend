@@ -1,0 +1,168 @@
+<section class="trips-filters">
+  <mat-form-field subscriptSizing="dynamic" appearance="outline" class="search-field">
+    <mat-label>Search</mat-label>
+    <input
+      matInput
+      placeholder="Search by trip ID, route, driver..."
+      type="text"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </mat-form-field>
+
+  <div class="filters-actions">
+    <div class="filter-group">
+      <!-- 🏷️ Status -->
+      <mat-form-field subscriptSizing="dynamic" appearance="outline" class="filter-select">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusChange($event.value)">
+          <mat-option value="all">All</mat-option>
+          <mat-option value="0">Completed</mat-option>
+          <mat-option value="1">Cancelled</mat-option>
+          <mat-option value="2">In Progress</mat-option>
+          <mat-option value="3">Created</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field subscriptSizing="dynamic" appearance="outline" class="filter-select">
+        <mat-label>Created Between</mat-label>
+
+        <mat-date-range-input
+          [rangePicker]="picker"
+          [comparisonStart]="fromDate"
+          [comparisonEnd]="toDate"
+        >
+          <input matStartDate placeholder="From" [(ngModel)]="fromDate" />
+          <input matEndDate placeholder="To" [(ngModel)]="toDate" />
+        </mat-date-range-input>
+
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+      <button matButton="outlined" color="primary" (click)="applyDateFilter()">Apply</button>
+      <button mat-button (click)="clearDateFilter()">Clear</button>
+    </div>
+  </div>
+</section>
+
+<div class="table-container">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z1">
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let trip">{{ trip.id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="driver">
+      <th mat-header-cell *matHeaderCellDef>Driver</th>
+      <td mat-cell *matCellDef="let trip">{{ trip.driverId }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="deliveries">
+      <th mat-header-cell *matHeaderCellDef>Total Deliveries</th>
+      <td mat-cell *matCellDef="let trip">
+        {{ trip.deliveryOrders.length }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="completedDeliveries">
+      <th mat-header-cell *matHeaderCellDef>Completed deliveries</th>
+      <td mat-cell *matCellDef="let trip">
+        {{ trip.deliveryOrders.length }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let trip">
+        @if (trip.isCreated()) {
+        <span class="chip chip-blue">Created</span>
+        } @if (trip.isInProgress()) {
+        <span class="chip chip-orange">In Progress</span>
+        } @if (trip.isCompleted()) {
+        <span class="chip chip-green">Completed</span>
+        } @if (trip.isCancelled()) {
+        <span class="chip chip-red">Cancelled</span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>Created at</th>
+      <td mat-cell *matCellDef="let trip">{{ trip.createdAt | date : 'short' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="departure">
+      <th mat-header-cell *matHeaderCellDef>Started at</th>
+      <td mat-cell *matCellDef="let trip">
+        {{ (trip.startedAt | date : 'short') || '-' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let trip">
+        <button matIconButton [routerLink]="['/trips', trip.id]">
+          <mat-icon>visibility</mat-icon>
+        </button>
+
+        @if (trip.isCreated()) {
+        <button matIconButton (click)="openModifyModal(trip)">
+          <mat-icon>play_circle</mat-icon>
+        </button>
+        }
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+</div>
+
+<!-- ===== Modify modal (front-only) ===== -->
+<div class="m-overlay" [class.open]="isModifyOpen" (click)="closeModifyModal()"></div>
+
+<div
+  class="m-box"
+  [class.open]="isModifyOpen"
+  (click)="$event.stopPropagation()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modifyTitle"
+>
+  <div class="m-header">
+    <h3 id="modifyTitle">Modificar viaje</h3>
+  </div>
+
+  <div class="m-body">
+    <p class="m-desc">
+      ¿Estás seguro que deseas modificar el viaje? Realizar estos cambios pueden afectar al flujo.
+    </p>
+
+    <div class="m-flow">
+      <span class="chip chip-gray">{{ currentStatusLabel }}</span>
+      <span class="arrow">→</span>
+      <button class="chip chip-orange" type="button" (click)="toggleNextStatus()">
+        {{ nextStatusLabel }}
+      </button>
+    </div>
+
+    <hr class="m-sep" />
+
+    <div class="m-actions">
+      <button class="btn-cancel" type="button" (click)="closeModifyModal()" [disabled]="isSaving">
+        Cancel
+      </button>
+      <button class="btn-confirm" type="button" (click)="confirmModify()" [disabled]="isSaving">
+        @if (isSaving) {
+        <span class="spinner"></span>
+        }
+        {{ isSaving ? 'Saving…' : 'Confirm' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="m-toast" [class.show]="showToast">{{ toastMessage }}</div>

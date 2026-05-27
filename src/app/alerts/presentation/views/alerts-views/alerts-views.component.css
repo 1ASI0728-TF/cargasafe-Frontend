@@ -1,0 +1,74 @@
+.alerts-container {
+  padding: 2rem;
+}
+
+.alerts-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.summary {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.75rem;
+  border-radius: 12px;
+  min-width: 240px;
+  flex: 1 1 240px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card .icon mat-icon {
+  font-size: 42px;
+  width: 42px;
+  height: 42px;
+}
+
+.card .text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card .text h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.card .text p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.card.danger {
+  background-color: #fdecea;
+  color: #d32f2f;
+}
+
+.card.success {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}

@@ -1,0 +1,75 @@
+<div class="dashboard">
+  <div class="dashboard__header">
+    <h1 class="dashboard__title">Dashboard - Cargo Monitoring</h1>
+    <p class="dashboard__subtitle">
+      Visualization and analysis of trips, incidents and alerts from CargaSafe system
+    </p>
+  </div>
+
+  <div class="dashboard__content">
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" style="text-align: center; padding: 20px; background: #f0f0f0; margin: 10px; border-radius: 8px;">
+      <h3>🔄 Loading data...</h3>
+      <p>Please wait while dashboard data is being loaded</p>
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="dashboard__stats" *ngIf="!loading">
+      <div class="stat-card">
+        <h3>Total Trips</h3>
+        <span class="stat-number">{{ trips.length }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Active Trips</h3>
+        <span class="stat-number">{{ activeTrips }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Total Alerts</h3>
+        <span class="stat-number">{{ totalAlerts }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Pending Alerts</h3>
+        <span class="stat-number">{{ pendingAlerts }}</span>
+      </div>
+    </div>
+          
+    <!-- Data Preview -->
+    <div class="dashboard__section">
+      <div class="data-preview">
+        <div *ngIf="loading" class="loading">Loading data...</div>
+        <div *ngIf="!loading" class="preview-content">
+            <h3>Monthly Incidents Chart</h3>
+            <app-incidents-chart
+            [data]="incidentsData"
+            [loading]="loading">
+          </app-incidents-chart>
+          <h3>Recent Trips</h3>
+          <div class="trip-cards">
+            <div *ngFor="let trip of trips.slice(0, 3)" 
+                 class="trip-card"
+                 (click)="navigateToTripDetail(trip.id)">
+              <div class="trip-header">
+                <strong>{{ trip.vehiclePlate }}</strong>
+                <span class="status" [ngClass]="getStatusClass(trip.status)">
+                  {{ getStatusText(trip.status) }}
+                </span>
+              </div>
+              <div class="trip-details">
+                <p><strong>Driver:</strong> {{ trip.driverName }}</p>
+                <p><strong>Route:</strong> {{ trip.origin }} → {{ trip.destination }}</p>
+                <p><strong>Cargo:</strong> {{ trip.cargoType }}</p>
+                <p><strong>Distance:</strong> {{ trip.distance }} km</p>
+              </div>
+              <button class="view-details-btn">View Details</button>
+            </div>
+          </div>
+          
+          
+          
+          <!-- Custom incidents chart component -->
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

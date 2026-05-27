@@ -1,0 +1,28 @@
+.section {
+  display: flex;
+  width: 100%;
+  gap: 1.5rem;
+}
+
+.section-left {
+  min-width: 22.5rem;
+}
+.section-right {
+  flex-grow: 1;
+}
+.card-container {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+}
+
+.personal-info-container,
+.user-info-container {
+}
+
+.profile-image {
+  border-radius: 999px;
+  max-width: 10rem;
+}

@@ -1,0 +1,225 @@
+:host {
+  display: block;
+  padding: 16px 24px;
+}
+
+/* HEADER */
+.dd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 16px;
+}
+
+.dd-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.dd-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #7a7a7a;
+}
+
+.dd-status {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dd-status-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #999;
+}
+
+.dd-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid #e0e0e0;
+  color: #555;
+  background: #fafafa;
+}
+
+.dd-status-pill--online {
+  background: #e6f5eb;
+  border-color: #b0dfc0;
+  color: #216c3e;
+}
+
+.dd-status-pill--offline {
+  background: #ffecec;
+  border-color: #f5b5b5;
+  color: #b42318;
+}
+
+/* LAYOUT 2 COLUMNAS */
+.dd-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 1.2fr);
+  gap: 16px;
+}
+
+.dd-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dd-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* CARDS */
+.dd-card {
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e4e4e4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.dd-card-title {
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* TECHNICAL CARD BODY */
+.dd-tech {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.kv--full {
+  grid-column: 1 / -1;
+}
+
+.k {
+  color: #5a5a5a;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.v {
+  color: #111;
+  font-size: 14px;
+}
+
+/* Chip para placa */
+.dd-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.dd-empty {
+  color: #999;
+  font-style: italic;
+}
+
+/* ACTIONS COLUMN */
+.dd-card--actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.dd-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dd-actions-col .mat-mdc-button-base {
+  width: 100%;
+  justify-content: center;
+}
+
+.dd-btn-danger {
+  background-color: #fff5f5;
+}
+
+.dd-btn-danger:hover {
+  background-color: #ffebeb;
+}
+
+/* FOOTER */
+.dd-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .dd-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-tech {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dd-status {
+    align-items: flex-start;
+  }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-center p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+}

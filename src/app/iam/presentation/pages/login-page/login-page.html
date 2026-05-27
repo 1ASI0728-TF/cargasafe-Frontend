@@ -1,0 +1,96 @@
+<div class="login-container">
+  <div class="left-panel">
+    <div class="logo-container">
+      <svg class="logo-icon" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l1.96 2.5H17V9.5m-11 9A1.5 1.5 0 017.5 17 1.5 1.5 0 016 15.5 1.5 1.5 0 014.5 17 1.5 1.5 0 016 18.5M20 8h-3V4H3c-1.11 0-2 .89-2 2v11h2a3 3 0 003 3 3 3 0 003-3h6a3 3 0 003 3 3 3 0 003-3h2v-5l-3-4z"/>
+      </svg>
+      <h1 class="logo-text">CargaSafe</h1>
+    </div>
+
+    <div class="content">
+      <h2 class="title">Smart Cargo Monitoring</h2>
+      <p class="description">
+        Monitor your assets in real-time with total control over temperature, humidity,
+        vibration, and location. Protect your sensitive products and guarantee
+        deliveries in perfect condition.
+      </p>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-container">
+      <h2 class="welcome-title">Welcome back!</h2>
+      <p class="welcome-subtitle">Enter your credentials to access your account</p>
+
+      <form class="login-form" (ngSubmit)="onSubmit()">
+
+        <!-- EMAIL -->
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            id="email"
+            [(ngModel)]="email"
+            name="email"
+            required
+            #emailInput="ngModel">
+          <mat-error *ngIf="emailInput.invalid && emailInput.touched">
+            Email is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- PASSWORD -->
+        <mat-form-field appearance="outline" class="full-width-input">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-pressed]="showPassword"
+            aria-label="Show or hide password"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div class="form-options">
+          <div class="remember-me">
+            <mat-checkbox
+              id="remember"
+              [(ngModel)]="rememberMe"
+              name="remember">
+              Remember me
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="isLoading"
+          class="btn-signin-mat"
+        >
+          {{ isLoading ? 'Signing in…' : 'Sign In' }}
+        </button>
+
+        <p class="signup-text">
+          Don't have an account?
+          <a href="#" class="signup-link" (click)="onSignUp($event)">Sign up here</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+

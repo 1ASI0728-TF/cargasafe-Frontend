@@ -1,0 +1,43 @@
+.progress-spinner {
+  margin: 2rem auto;
+}
+
+.personal-info-title {
+  font-size: 1.5rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-grey-2);
+  margin: 0 0 2rem;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-field-entry {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.form-actions {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancel-btn {
+  color: var(--color-severity-error) !important;
+  border-color: currentColor !important;
+}

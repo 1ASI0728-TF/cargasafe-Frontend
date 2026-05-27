@@ -1,0 +1,160 @@
+<!-- Loading / Not found -->
+<div *ngIf="vehicleState().loading()" class="loading-overlay">
+  <div class="loading-center">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading vehicle…</p>
+  </div>
+</div>
+
+<!-- OK -->
+<ng-container *ngIf="vehicle() as v">
+  <!-- Page header -->
+  <div class="vd-header">
+    <div>
+      <h1 class="vd-title">Vehicle {{ v.plate }}</h1>
+      <p class="vd-subtitle">Technical overview and IoT assignment</p>
+    </div>
+
+    <div class="vd-status">
+      <span class="vd-status-label">Status</span>
+      <span
+        class="vd-status-pill"
+        [ngClass]="{
+          'vd-status-pill--in': v.status === 'IN_SERVICE',
+          'vd-status-pill--out': v.status === 'OUT_OF_SERVICE',
+          'vd-status-pill--maintenance': v.status === 'MAINTENANCE',
+          'vd-status-pill--retired': v.status === 'RETIRED'
+        }"
+      >
+        {{ v.status }}
+      </span>
+    </div>
+  </div>
+
+  <div class="vd-grid">
+    <!-- MAIN COLUMN -->
+    <div class="vd-main">
+      <mat-card class="vd-card">
+        <div class="vd-card-title">Technical card</div>
+
+        <div class="vd-tech">
+          <div class="kv">
+            <div class="k">Type</div>
+            <div class="v">{{ v.type }}</div>
+          </div>
+
+          <div class="kv">
+            <div class="k">IoT devices</div>
+            <div class="v">
+              <ng-container *ngIf="(v.deviceImeis?.length ?? 0) > 0; else noIoT">
+                <mat-chip-set>
+                  <mat-chip
+                    *ngFor="let imei of v.deviceImeis; trackBy: trackByValue"
+                    appearance="outlined"
+                    selected
+                  >
+                    {{ imei }}
+                  </mat-chip>
+                </mat-chip-set>
+              </ng-container>
+              <ng-template #noIoT>
+                <span class="vd-empty">No device assigned</span>
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="kv kv--full">
+            <div class="k">Capabilities</div>
+            <div class="v">
+              <ng-container *ngIf="(v.capabilities?.length ?? 0) > 0; else noCaps">
+                <mat-chip-set>
+                  <mat-chip
+                    *ngFor="let c of v.capabilities; trackBy: trackByValue"
+                    appearance="outlined"
+                    selected
+                  >
+                    {{ c }}
+                  </mat-chip>
+                </mat-chip-set>
+              </ng-container>
+              <ng-template #noCaps>
+                <span class="vd-empty">No capabilities configured</span>
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div class="k">Odometer</div>
+            <div class="v">
+              {{ v.odometerKm ?? 0 | number: '1.0-0' }} km
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- ASIDE ACTIONS -->
+    <aside class="vd-aside">
+      <mat-card class="vd-card vd-card--actions">
+        <p class="vd-actions-title">Quick actions</p>
+
+        <div class="vd-actions-col">
+          <!-- Estados -->
+          <div class="vd-actions-group">
+            <button mat-raised-button color="primary" (click)="setAvailable(v)">
+              Set in service
+            </button>
+
+            <button mat-raised-button color="warn" (click)="setOutOfService(v)">
+              Set out of service
+            </button>
+
+            <button mat-stroked-button (click)="setMaintenance(v)">
+              Set in maintenance
+            </button>
+
+            <button
+              mat-stroked-button
+              (click)="openRetireDialog(v)"
+              [disabled]="v.status === 'RETIRED'"
+            >
+              Set as retired
+            </button>
+          </div>
+
+          <!-- IoT assignment -->
+          <div class="vd-actions-group">
+            <button mat-raised-button color="primary" (click)="openAssignDialog(v)">
+              Assign IoT device
+            </button>
+            <button
+              mat-raised-button
+              color="warn"
+              (click)="openUnassignDialog(v)"
+              [disabled]="(v.deviceImeis?.length ?? 0) === 0"
+            >
+              Unassign device
+            </button>
+            <button
+              mat-raised-button
+              color="warn"
+              class="vd-btn-danger"
+              (click)="unassignAll(v)"
+              [disabled]="(v.deviceImeis?.length ?? 0) === 0"
+            >
+              Unassign all
+            </button>
+          </div>
+        </div>
+      </mat-card>
+    </aside>
+  </div>
+
+  <!-- Footer actions -->
+  <div class="vd-footer">
+    <button mat-stroked-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+</ng-container>

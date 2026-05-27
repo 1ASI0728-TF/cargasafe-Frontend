@@ -1,0 +1,21 @@
+<div class="dialog-container">
+  <div class="dialog-icon">
+    <mat-icon>report_gmailerrorred</mat-icon>
+  </div>
+
+  <h2 class="dialog-title">
+    {{ data.title }}
+  </h2>
+
+  <p class="dialog-message">
+    {{ data.message }}
+  </p>
+
+  <div *ngIf="data.status" class="dialog-status">
+    Error code: <strong>{{ data.status }}</strong>
+  </div>
+
+  <button mat-raised-button color="warn" (click)="close()">
+    Ok
+  </button>
+</div>

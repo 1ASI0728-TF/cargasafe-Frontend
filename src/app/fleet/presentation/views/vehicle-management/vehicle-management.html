@@ -1,0 +1,128 @@
+<div class="vm-header">
+  <h1 class="vm-title">Vehicles</h1>
+  <button mat-raised-button color="primary" (click)="openCreateDialog()">
+    <mat-icon>add</mat-icon>
+    Add Vehicle
+  </button>
+</div>
+
+<!-- KPI cards -->
+<div class="vm-cards">
+
+  <div class="vm-card">
+    <div class="vm-card-title">In Service</div>
+    <div class="vm-card-number">{{ inServiceCount }}</div>
+    <div class="vm-card-sub">active assignments</div>
+  </div>
+
+  <div class="vm-card">
+    <div class="vm-card-title">Out of Service</div>
+    <div class="vm-card-number">{{ outOfServiceCount }}</div>
+    <div class="vm-card-sub">vehicles currently out of service</div>
+  </div>
+
+  <div class="vm-card">
+    <div class="vm-card-title">In Maintenance</div>
+    <div class="vm-card-number">{{ maintenanceCount }}</div>
+    <div class="vm-card-sub">vehicles currently under maintenance</div>
+  </div>
+
+  <div class="vm-card">
+    <div class="vm-card-title">Retired</div>
+    <div class="vm-card-number">{{ retiredCount }}</div>
+    <div class="vm-card-sub">no longer available in the fleet</div>
+  </div>
+
+</div>
+
+<!-- Toolbar búsqueda + filtros -->
+<div class="vm-toolbar">
+  <mat-form-field appearance="outline" class="vm-search">
+    <mat-label>Search by plate, type…</mat-label>
+    <input matInput (input)="applySearch($any($event.target).value)" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="vm-filter">
+    <mat-label>All states</mat-label>
+    <mat-select (selectionChange)="applyStatus($event.value)" [value]="''">
+      <mat-option value="">All states</mat-option>
+      <mat-option *ngFor="let s of ['IN_SERVICE','OUT_OF_SERVICE','MAINTENANCE','RETIRED']" [value]="s">
+        {{ s.replaceAll('_',' ') | titlecase }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="vm-filter">
+    <mat-label>All capability</mat-label>
+    <mat-select (selectionChange)="applyCapability($event.value)" [value]="''">
+      <mat-option value="">All capability</mat-option>
+      <mat-option *ngFor="let c of capabilityOptions" [value]="c">{{ c }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="table mt">
+  <table mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+      <td mat-cell *matCellDef="let r">{{ r.id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="plate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Plate</th>
+      <td mat-cell *matCellDef="let r">{{ r.plate }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+      <td mat-cell *matCellDef="let r">{{ r.type.replaceAll('_',' ') | titlecase }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="capabilities">
+      <th mat-header-cell *matHeaderCellDef>Capabilities</th>
+      <td mat-cell *matCellDef="let r">{{ r.capabilities?.join(', ') }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+      <td mat-cell *matCellDef="let r">{{ r.status.replaceAll('_',' ') | titlecase }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="deviceImeis">
+      <th mat-header-cell *matHeaderCellDef>IoT</th>
+      <td mat-cell *matCellDef="let r">
+        <ng-container *ngIf="(r.deviceImeis?.length ?? 0) > 0; else noIoT">
+          {{ r.deviceImeis[0] }}
+          <ng-container *ngIf="r.deviceImeis.length > 1">
+            (+{{ r.deviceImeis.length - 1 }})
+          </ng-container>
+        </ng-container>
+        <ng-template #noIoT>—</ng-template>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let r" class="actions-cell">
+        <button mat-icon-button aria-label="View" (click)="onView(r)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button color="primary" aria-label="Edit" (click)="onEdit(r)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" aria-label="Delete" (click)="onDelete(r)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 20]"
+    [pageSize]="5"
+    showFirstLastButtons>
+  </mat-paginator>
+</div>

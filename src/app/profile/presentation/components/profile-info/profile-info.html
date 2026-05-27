@@ -1,0 +1,98 @@
+<div class="relative">
+  <h2 class="personal-info-title">Personal Information</h2>
+
+  @if (profile$().loading()) {
+  <mat-progress-spinner
+    mode="indeterminate"
+    [diameter]="48"
+    class="progress-spinner"
+  ></mat-progress-spinner>
+
+  } @else {
+  <div>
+    <form [formGroup]="form" id="profile-form" (submit)="onClickSave()">
+      <div class="form-fields">
+        <div class="form-field-entry">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>First Name</mat-label>
+            <input matInput placeholder="Enter your first name" formControlName="firstName" />
+            @if (hasError('firstName', 'required')) {
+            <mat-error>First Name is required.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Last Name</mat-label>
+            <input matInput placeholder="Enter your last name" formControlName="lastName" />
+            @if (hasError('lastName', 'required')) {
+            <mat-error>Last Name is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-field-entry">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Phone Number</mat-label>
+            <input matInput placeholder="Enter your phone number" formControlName="phoneNumber" />
+            @if (hasError('phoneNumber', 'required')) {
+            <mat-error>Phone Number is required.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Birthdate</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              placeholder="Enter your birthdate"
+              formControlName="birthDate"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if (hasError('birthDate', 'required')) {
+            <mat-error>Birthdate is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-field-entry">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Document Type</mat-label>
+            <mat-select formControlName="documentType">
+              @for (item of documentTypesOptions; track $index) {
+              <mat-option [value]="item.value">{{ item.label }}</mat-option>
+              }
+            </mat-select>
+            @if (hasError('documentType', 'required')) {
+            <mat-error>Document Type is required.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Document</mat-label>
+            <input matInput placeholder="Enter document number" formControlName="document" />
+            @if (hasError('document', 'required')) {
+            <mat-error>Document number is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  @if(!isEditMode()) {
+  <button class="edit-btn" matButton="text" aria-label="Edit button" (click)="onClickEdit()">
+    <mat-icon>edit</mat-icon>
+    Edit
+  </button>
+  } @else {
+  <div class="form-actions">
+    <button matButton="outlined" class="cancel-btn" aria-label="Cancel" (click)="onClickCancel()">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+
+    <button matButton="filled" aria-label="Save data" form="profile-form" type="submit">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+  </div>
+  } }
+</div>

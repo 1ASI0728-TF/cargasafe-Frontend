@@ -1,0 +1,102 @@
+<section class="app-layout">
+  <!-- Mobile header (shown on small screens) -->
+  <header class="mobile-header">
+    <button class="menu-btn" aria-label="Open menu" (click)="toggleSidebar()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="mobile-brand">
+      <img src="assets/svgs/logo-white.svg" alt="CargoSafe Logo" class="mobile-logo" />
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="sidebar__brand">
+      <img src="assets/svgs/logo-white.svg" alt="CargoSafe Logo" class="sidebar__logo" />
+    </div>
+
+    <nav class="sidebar__nav">
+      <ul>
+        <!-- Dashboard - Visible para todos -->
+        <li>
+          <a routerLink="/dashboard" routerLinkActive="active">
+            <mat-icon>dashboard</mat-icon>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <!-- Vehicles - Solo OPERATOR -->
+        @if (userStore.user()?.isOperator() || userStore.user()?.isAdmin()) {
+        <li>
+          <a routerLink="/fleet/vehicles" routerLinkActive="active">
+            <mat-icon>local_shipping</mat-icon>
+            <span>Vehicles</span>
+          </a>
+        </li>
+        }
+
+        <!-- Sensors - Solo OPERATOR -->
+        @if (userStore.user()?.isOperator() || userStore.user()?.isAdmin()) {
+        <li>
+          <a routerLink="/fleet/devices" routerLinkActive="active">
+            <mat-icon>sensors</mat-icon>
+            <span>Sensors</span>
+          </a>
+        </li>
+        }
+
+        <!-- Trips - Visible para todos -->
+        <li>
+          <a
+            routerLink="/trips"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>route</mat-icon>
+            <span>Trips</span>
+          </a>
+        </li>
+
+        <!-- Alerts - Visible para todos -->
+        <li>
+          <a routerLink="/alerts" routerLinkActive="active">
+            <mat-icon>notifications</mat-icon>
+            <span>Alerts</span>
+          </a>
+        </li>
+
+        <!-- Profile - Visible para todos -->
+        <li>
+          <a routerLink="/profile" routerLinkActive="active">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+          </a>
+        </li>
+
+        <!-- Subscriptions - Solo OPERATOR -->
+        @if (userStore.user()?.isOperator()) {
+        <li>
+          <a routerLink="/subscriptions" routerLinkActive="active">
+            <mat-icon>card_membership</mat-icon>
+            <span>Subscriptions</span>
+          </a>
+        </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="sidebar__footer">
+      <a (click)="onLogout($event)" style="cursor: pointer">
+        <mat-icon>logout</mat-icon>
+        <span>Log out</span>
+      </a>
+    </div>
+  </aside>
+  <!-- Overlay for mobile when sidebar is open -->
+  <div class="overlay" *ngIf="sidebarOpen()" (click)="toggleSidebar(false)"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</section>

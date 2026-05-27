@@ -1,0 +1,98 @@
+.subscriptions-page {
+  padding: 32px 40px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 24px;
+}
+
+.plan-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+.summary {
+  padding: 24px 24px 8px;
+  background: #f7f6f9;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 12px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.value {
+  font-weight: 700;
+}
+
+.actions {
+  display: grid;
+  gap: 12px;
+}
+
+.pill {
+  border-radius: 9999px !important;
+  padding: 10px 16px !important;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.pill mat-icon {
+  margin-right: 6px;
+}
+
+.receipt-cta {
+  margin: 20px 0;
+}
+
+.history {
+  padding: 16px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.history__title {
+  margin: 0 0 12px;
+  color: #f3922b;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.history__table {
+  width: 100%;
+}
+.history__table-container {
+  overflow: auto;
+  width: 100%;
+}
+.history__table th {
+  font-weight: 700;
+  width: 100%;
+}
+.history__table .mat-mdc-row {
+  height: 52px;
+}
+
+@media screen and (max-width: 1024px) {
+  .plan-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .plan-content .summary {
+    width: 100%;
+  }
+}

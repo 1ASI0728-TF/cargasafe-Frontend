@@ -1,0 +1,99 @@
+<!-- Loading / Not found -->
+    <div *ngIf="deviceState().loading()" class="loading-overlay">
+  <div class="loading-center">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading device…</p>
+  </div>
+</div>
+
+<!-- OK -->
+    <ng-container *ngIf="device() as d">
+  <!-- Page header -->
+  <div class="dd-header">
+    <div>
+      <h1 class="dd-title">Device {{ d.imei }}</h1>
+      <p class="dd-subtitle">Status, firmware and vehicle link</p>
+    </div>
+
+    <div class="dd-status">
+      <span class="dd-status-label">Status</span>
+      <span
+        class="dd-status-pill"
+        [ngClass]="{
+          'dd-status-pill--online': d.online,
+          'dd-status-pill--offline': !d.online
+        }"
+      >
+        {{ d.online ? 'Online' : 'Offline' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <!-- MAIN COLUMN -->
+    <div class="dd-main">
+      <!-- Technical Card -->
+      <mat-card class="dd-card">
+        <div class="dd-card-title">Technical card</div>
+
+        <div class="dd-tech">
+          <div class="kv">
+            <div class="k">Firmware</div>
+            <div class="v">{{ d.firmware || '—' }}</div>
+          </div>
+
+          <div class="kv kv--full">
+            <div class="k">Linked vehicle</div>
+            <div class="v">
+              <ng-container *ngIf="d.vehiclePlate; else noVehicle">
+                <span class="dd-chip">{{ d.vehiclePlate }}</span>
+              </ng-container>
+              <ng-template #noVehicle>
+                <span class="dd-empty">Not linked to any vehicle</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="dd-aside">
+      <mat-card class="dd-card dd-card--actions">
+        <div class="dd-card-title">Actions</div>
+
+        <div class="dd-actions-col">
+          <button mat-raised-button color="primary" (click)="toggleOnline(d)">
+            {{ d.online ? 'Set Offline' : 'Set Online' }}
+          </button>
+
+          <button mat-stroked-button (click)="openUpdateFirmwareDialog(d)">
+            Update firmware
+          </button>
+
+          <button mat-stroked-button (click)="openAssignVehicleDialog(d)">
+            Link to vehicle
+          </button>
+
+          <button
+            mat-raised-button
+            color="warn"
+            class="dd-btn-danger"
+            (click)="unlink(d)"
+            [disabled]="!d.vehiclePlate"
+          >
+            Unlink
+          </button>
+        </div>
+      </mat-card>
+    </aside>
+  </div>
+
+  <!-- Footer actions -->
+  <div class="dd-footer">
+    <button mat-stroked-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+</ng-container>
