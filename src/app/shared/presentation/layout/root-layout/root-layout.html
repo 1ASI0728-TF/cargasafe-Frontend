@@ -45,6 +45,16 @@
         </li>
         }
 
+        <!-- Monitoring - Solo OPERATOR / ADMIN (vista IoT en vivo) -->
+        @if (userStore.user()?.isOperator() || userStore.user()?.isAdmin()) {
+        <li>
+          <a routerLink="/monitoring" routerLinkActive="active">
+            <mat-icon>monitor_heart</mat-icon>
+            <span>Monitoring</span>
+          </a>
+        </li>
+        }
+
         <!-- Trips - Visible para todos -->
         <li>
           <a

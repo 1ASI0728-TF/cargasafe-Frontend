@@ -90,7 +90,27 @@
           <a href="#" class="signup-link" (click)="onSignUp($event)">Sign up here</a>
         </p>
       </form>
+
+      <!-- TEST BUILD: demo accounts + reset shortcut (fake, in-browser API, no real backend) -->
+      <div class="demo-accounts-box">
+        <p class="demo-accounts-title">Test build · demo accounts</p>
+        <div class="demo-accounts-buttons">
+          <button
+            type="button"
+            mat-stroked-button
+            *ngFor="let account of demoAccounts"
+            (click)="fillDemoAccount(account)"
+          >
+            {{ account.label }}
+          </button>
+        </div>
+        <p class="demo-accounts-hint">
+          Fills the credentials above — just click "Sign In" afterwards.
+        </p>
+        <a href="#" class="demo-reset-link" (click)="onResetDemoData($event)">
+          Reset demo data
+        </a>
+      </div>
     </div>
   </div>
 </div>
-

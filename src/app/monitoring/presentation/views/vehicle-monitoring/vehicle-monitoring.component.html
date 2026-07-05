@@ -1,0 +1,162 @@
+<div class="mon-header">
+  <div>
+    <h1 class="mon-title">Vehicle IoT Monitoring</h1>
+    <p class="mon-subtitle">Live simulated data stream from the cargo temperature &amp; humidity sensor</p>
+  </div>
+
+  <mat-form-field appearance="outline" class="mon-vehicle-select" *ngIf="vehicles().length > 0">
+    <mat-label>Vehicle</mat-label>
+    <mat-select
+      [value]="selectedVehicleId()"
+      (selectionChange)="selectVehicle($event.value)"
+    >
+      <mat-option *ngFor="let v of vehicles()" [value]="v.id">
+        {{ v.plate }} — {{ v.type }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div *ngIf="vehiclesLoading() && vehicles().length === 0" class="mon-loading">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p>Loading fleet…</p>
+</div>
+
+<div *ngIf="!vehiclesLoading() && vehicles().length === 0" class="mon-empty">
+  <mat-icon>local_shipping</mat-icon>
+  <p>No vehicles registered yet. Add one from Fleet → Vehicles to start monitoring.</p>
+</div>
+
+<ng-container *ngIf="selectedVehicle() as vehicle">
+  <div class="mon-alert-banner" *ngIf="alertBanner() as banner">
+    {{ banner }}
+  </div>
+
+  <div class="mon-vehicle-strip">
+    <div class="mon-vehicle-info">
+      <span class="mon-plate">{{ vehicle.plate }}</span>
+      <span class="mon-sep">•</span>
+      <span>{{ vehicle.type }}</span>
+      <span class="mon-sep">•</span>
+      <span *ngIf="selectedDevice() as device; else noDevice">
+        <mat-icon class="mon-inline-icon" [class.online]="device.online" [class.offline]="!device.online">
+          sensors
+        </mat-icon>
+        {{ device.imei }} · firmware {{ device.firmware }} ·
+        <span [class.online]="device.online" [class.offline]="!device.online">
+          {{ device.online ? 'Online' : 'Offline' }}
+        </span>
+      </span>
+      <ng-template #noDevice>
+        <span class="mon-no-device">No IoT device assigned to this vehicle</span>
+      </ng-template>
+    </div>
+
+    <div
+      class="mon-status-pill"
+      [ngClass]="{
+        'mon-status--normal': overallStatus() === 'NORMAL',
+        'mon-status--warning': overallStatus() === 'WARNING',
+        'mon-status--critical': overallStatus() === 'CRITICAL'
+      }"
+    >
+      <mat-icon>{{ overallStatus() === 'NORMAL' ? 'check_circle' : 'warning' }}</mat-icon>
+      {{ overallStatus() }}
+    </div>
+  </div>
+
+  <div class="mon-grid">
+    <!-- TEMPERATURE -->
+    <mat-card class="mon-card">
+      <div class="mon-card-header">
+        <mat-icon>thermostat</mat-icon>
+        <span>Temperature</span>
+        <span
+          class="mon-chip"
+          [ngClass]="{
+            'mon-chip--normal': temperatureStatus() === 'NORMAL',
+            'mon-chip--warning': temperatureStatus() === 'WARNING',
+            'mon-chip--critical': temperatureStatus() === 'CRITICAL'
+          }"
+        >
+          {{ temperatureStatus() }}
+        </span>
+      </div>
+
+      <div class="mon-value">
+        {{ temperature() | number: '1.1-1' }}<span class="mon-unit">°C</span>
+      </div>
+
+      <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
+        <polyline
+          [attr.points]="sparklinePoints('temperature')"
+          fill="none"
+          stroke="var(--mon-temp-color, #ef4444)"
+          stroke-width="2"
+        />
+      </svg>
+
+      <p class="mon-range-hint">Expected range: ~19°C – 21°C (ambient, ±1°C)</p>
+    </mat-card>
+
+    <!-- HUMIDITY -->
+    <mat-card class="mon-card">
+      <div class="mon-card-header">
+        <mat-icon>water_drop</mat-icon>
+        <span>Humidity</span>
+        <span
+          class="mon-chip"
+          [ngClass]="{
+            'mon-chip--normal': humidityStatus() === 'NORMAL',
+            'mon-chip--warning': humidityStatus() === 'WARNING',
+            'mon-chip--critical': humidityStatus() === 'CRITICAL'
+          }"
+        >
+          {{ humidityStatus() }}
+        </span>
+      </div>
+
+      <div class="mon-value">
+        {{ humidity() | number: '1.1-1' }}<span class="mon-unit">%</span>
+      </div>
+
+      <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
+        <polyline
+          [attr.points]="sparklinePoints('humidity')"
+          fill="none"
+          stroke="var(--mon-hum-color, #3b82f6)"
+          stroke-width="2"
+        />
+      </svg>
+
+      <p class="mon-range-hint">Expected range: ~83% – 85% (±1%)</p>
+    </mat-card>
+  </div>
+
+  <mat-card class="mon-history-card" *ngIf="history().length > 0">
+    <div class="mon-card-header">
+      <mat-icon>history</mat-icon>
+      <span>Recent readings</span>
+      <span class="mon-last-update">Last update: {{ lastUpdate() | date: 'HH:mm:ss' }}</span>
+    </div>
+
+    <div class="mon-table-wrapper">
+      <table class="mon-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Temperature (°C)</th>
+            <th>Humidity (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let point of history().slice().reverse(); trackBy: trackByTime">
+            <td>{{ point.time }}</td>
+            <td>{{ point.temperature | number: '1.1-1' }}</td>
+            <td>{{ point.humidity | number: '1.1-1' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </mat-card>
+</ng-container>

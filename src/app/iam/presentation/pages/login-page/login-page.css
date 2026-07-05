@@ -264,3 +264,43 @@ body {
 
 
 
+
+/* ---------------------------------------------------------------
+   TEST BUILD: demo accounts + reset shortcut
+   --------------------------------------------------------------- */
+.demo-accounts-box {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 147, 51, 0.06);
+}
+
+.demo-accounts-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  color: rgba(0, 0, 0, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.demo-accounts-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.demo-accounts-hint {
+  font-size: 0.78rem;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 6px;
+}
+
+.demo-reset-link {
+  font-size: 0.8rem;
+  color: #b45309;
+  text-decoration: underline;
+  cursor: pointer;
+}

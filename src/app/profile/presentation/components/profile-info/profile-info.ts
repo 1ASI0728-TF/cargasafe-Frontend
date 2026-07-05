@@ -10,6 +10,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { Profile } from '../../../domain/model/profile.entity';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { UserStore } from '../../../../iam/application/user.store';
 
 @Component({
   selector: 'app-profile-info',
@@ -30,8 +31,11 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 export class ProfileInfo implements OnInit {
   isEditMode = signal(false);
   profileStore = inject(ProfileStore);
+  userStore = inject(UserStore);
   profile$ = computed(() => this.profileStore.profileState);
   private fb = inject(FormBuilder);
+  private profileLoadedForUserId: number | null = null;
+
   documentTypesOptions = [
     { value: 'DNI', label: 'DNI' },
     { value: 'PAS', label: 'Passport' },
@@ -55,12 +59,31 @@ export class ProfileInfo implements OnInit {
         this.form.disable();
       }
     });
+
+    // Loads (or reloads) the profile whenever the logged-in user becomes available/changes.
+    // This replaces the previous hardcoded `loadProfileByUserId(1)`, so both demo accounts
+    // (OPERATOR and CLIENT) see their own profile instead of always user #1's.
+    effect(() => {
+      const userId = this.userStore.user()?.id;
+      if (!userId || this.profileLoadedForUserId === userId) return;
+
+      this.profileLoadedForUserId = userId;
+      this.profileStore.loadProfileByUserId(userId).subscribe(() => {
+        this.syncProfileToForm();
+      });
+    });
   }
 
   ngOnInit(): void {
-    this.profileStore.loadProfileByUserId(1).subscribe(() => {
-      this.syncProfileToForm();
-    });
+    // Fallback in case the user signal was already set before this component was created
+    // (effect() above already handles the reactive case; this covers the synchronous one).
+    const userId = this.userStore.user()?.id;
+    if (userId && this.profileLoadedForUserId !== userId) {
+      this.profileLoadedForUserId = userId;
+      this.profileStore.loadProfileByUserId(userId).subscribe(() => {
+        this.syncProfileToForm();
+      });
+    }
   }
 
   /**

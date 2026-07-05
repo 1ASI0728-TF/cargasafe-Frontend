@@ -12,6 +12,8 @@ const tripRoutes = () => import('./trips/presentation/trip.routes').then((m) => 
 const alertRoutes = () => import('./alerts/presentation/alert.routes').then((m) => m.routes);
 const fleetRoutes = () => import('./fleet/presentation/fleet.routes').then((m) => m.routes);
 const profileRoutes = () => import('./profile/presentation/profile.routes').then((m) => m.routes);
+const monitoringRoutes = () =>
+  import('./monitoring/presentation/monitoring.routes').then((m) => m.routes);
 
 // app.routes.ts (root)
 export const routes: Routes = [
@@ -46,6 +48,10 @@ export const routes: Routes = [
       {
         path: 'fleet',
         loadChildren: fleetRoutes,
+      },
+      {
+        path: 'monitoring',
+        loadChildren: monitoringRoutes,
       },
       {
         path: 'profile',

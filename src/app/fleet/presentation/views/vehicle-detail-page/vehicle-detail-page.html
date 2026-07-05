@@ -99,6 +99,14 @@
         <p class="vd-actions-title">Quick actions</p>
 
         <div class="vd-actions-col">
+          <!-- Live IoT monitoring -->
+          <div class="vd-actions-group">
+            <button mat-raised-button color="accent" (click)="openMonitoring(v)">
+              <mat-icon>monitor_heart</mat-icon>
+              Live monitoring
+            </button>
+          </div>
+
           <!-- Estados -->
           <div class="vd-actions-group">
             <button mat-raised-button color="primary" (click)="setAvailable(v)">

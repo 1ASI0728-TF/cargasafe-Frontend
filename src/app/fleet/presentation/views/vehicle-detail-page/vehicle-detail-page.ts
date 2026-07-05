@@ -56,6 +56,11 @@ export class VehicleDetailPageComponent implements OnInit {
     void this.router.navigate(['/fleet/vehicles']);
   }
 
+  openMonitoring(v: Vehicle) {
+    if (!v?.id) return;
+    void this.router.navigate(['/monitoring'], { queryParams: { vehicleId: v.id } });
+  }
+
   edit(v?: Vehicle | null) {
     if (v?.id) {
       void this.router.navigate(['/fleet/vehicles'], { queryParams: { edit: v.id } });

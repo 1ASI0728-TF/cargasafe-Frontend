@@ -4,35 +4,33 @@ import { map, Observable } from 'rxjs';
 import { Invoice } from '../domain/invoice';
 import { Plan } from '../domain/plan';
 import { environment } from '../../../environments/environment';
+import { UserStore } from '../../iam/application/user.store';
 
-//POR EL MOMENTO YA QUE AUN NO HAY UN AUTH
-const USER_ID = '1';
+type BackendPlan = {
+  id: number;
+  name: string;
+  limits: string;
+  price: number;
+  description: string;
+};
 
-  type BackendPlan = {
-    id: number;
-    name: string;
-    limits: string;
-    price: number;
-    description: string;
-  };
+type BackendPayment = {
+  id: number;
+  userId: number;
+  receiptUrl: string;
+  transactionId: string;
+  status: string;
+  amount: number;
+  paymentDate: string;
+};
 
-  type BackendPayment = {
-    id: number;
-    userId: number;
-    receiptUrl: string;
-    transactionId: string;
-    status: string;
-    amount: number;
-    paymentDate: string;
-  };
-
-  type BackendSubscriptionByUser = {
-    id: number;
-    userId: number;
-    status: 'ACTIVE' | 'CANCELED' | 'PENDING' | 'PAST_DUE';
-    renewal: string;
-    paymentMethod: string;
-    plan: BackendPlan;
+type BackendSubscriptionByUser = {
+  id: number;
+  userId: number;
+  status: 'ACTIVE' | 'CANCELED' | 'PENDING' | 'PAST_DUE';
+  renewal: string;
+  paymentMethod: string;
+  plan: BackendPlan;
 };
 
 export type SubscriptionVm = {
@@ -47,11 +45,16 @@ export type SubscriptionVm = {
   plan?: Plan;
 };
 
-
 @Injectable({ providedIn: 'root' })
 export class BillingService {
   private http = inject(HttpClient);
+  private userStore = inject(UserStore);
   private API_URL = environment.baseUrl;
+
+  /** Id of the currently logged-in user, used to scope subscriptions/payments. */
+  private get userId(): string {
+    return String(this.userStore.user()?.id ?? '1');
+  }
 
   getPlans(): Observable<Plan[]> {
     return this.http.get<BackendPlan[]>(`${this.API_URL}/plans`).pipe(
@@ -68,7 +71,7 @@ export class BillingService {
   }
 
   getSubscription(): Observable<SubscriptionVm | null> {
-    return this.http.get<BackendSubscriptionByUser>(`${this.API_URL}/subscription/user-id/${USER_ID}`).pipe(
+    return this.http.get<BackendSubscriptionByUser>(`${this.API_URL}/subscription/user-id/${this.userId}`).pipe(
       map((s) => ({
         id: s.id,
         userId: s.userId,
@@ -125,7 +128,7 @@ export class BillingService {
   }
 
   getPayments(): Observable<Invoice[]> {
-    return this.http.get<BackendPayment[]>(`${this.API_URL}/payments/user-id/${USER_ID}`).pipe(
+    return this.http.get<BackendPayment[]>(`${this.API_URL}/payments/user-id/${this.userId}`).pipe(
       map((arr) =>
         arr
           .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime())
