@@ -33,21 +33,49 @@
   cursor: pointer;
 }
 
+.mobile-brand {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
 .mobile-logo {
   height: 1.25rem;
 }
 
 .sidebar__brand {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0 1.5rem;
   margin-bottom: 1.5rem;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
 .sidebar__logo {
   width: 9rem;
   height: 1.875rem;
+}
+
+/* Fills up while the logo is held down; completing it triggers the hidden
+   "reset demo data" trick (see RootLayout.onSecretReset). */
+.logo-hold-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 0;
+  background: #ffffff;
+  opacity: 0.85;
+  transition: width 0.05s linear;
 }
 
 .sidebar__title {

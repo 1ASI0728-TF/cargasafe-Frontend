@@ -1,7 +1,7 @@
 <div class="mon-header">
   <div>
     <h1 class="mon-title">Vehicle IoT Monitoring</h1>
-    <p class="mon-subtitle">Live simulated data stream from the cargo temperature &amp; humidity sensor</p>
+    <p class="mon-subtitle">Live data stream from the cargo temperature &amp; humidity sensor</p>
   </div>
 
   <mat-form-field appearance="outline" class="mon-vehicle-select" *ngIf="vehicles().length > 0">
@@ -54,6 +54,7 @@
 
     <div
       class="mon-status-pill"
+      *ngIf="hasDevice()"
       [ngClass]="{
         'mon-status--normal': overallStatus() === 'NORMAL',
         'mon-status--warning': overallStatus() === 'WARNING',
@@ -65,98 +66,226 @@
     </div>
   </div>
 
-  <div class="mon-grid">
-    <!-- TEMPERATURE -->
-    <mat-card class="mon-card">
+  <ng-container *ngIf="hasDevice(); else noDeviceState">
+    <div class="mon-grid">
+      <!-- TEMPERATURE (click to expand) -->
+      <mat-card
+        class="mon-card mon-card--clickable"
+        role="button"
+        tabindex="0"
+        (click)="openTempDetail()"
+        (keydown.enter)="openTempDetail()"
+        aria-label="Expand temperature detail"
+      >
+        <div class="mon-card-header">
+          <mat-icon>thermostat</mat-icon>
+          <span>Temperature</span>
+          <span
+            class="mon-chip"
+            [ngClass]="{
+              'mon-chip--normal': temperatureStatus() === 'NORMAL',
+              'mon-chip--warning': temperatureStatus() === 'WARNING',
+              'mon-chip--critical': temperatureStatus() === 'CRITICAL'
+            }"
+          >
+            {{ temperatureStatus() }}
+          </span>
+          <mat-icon class="mon-expand-hint" aria-hidden="true">open_in_full</mat-icon>
+        </div>
+
+        <div class="mon-value">
+          {{ temperature() | number: '1.1-1' }}<span class="mon-unit">°C</span>
+        </div>
+
+        <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
+          <polyline
+            [attr.points]="sparklinePoints('temperature')"
+            fill="none"
+            stroke="var(--mon-temp-color, #ef4444)"
+            stroke-width="2"
+          />
+        </svg>
+
+        <p class="mon-range-hint">
+          Rango permitido: {{ rules().minTemperature }}°C – {{ rules().maxTemperature }}°C
+          <span class="mon-range-source">({{ rules().source === 'trip' ? 'viaje activo' : 'ambiente' }})</span>
+        </p>
+        <p class="mon-click-hint">Click para ver el detalle en grande</p>
+      </mat-card>
+
+      <!-- HUMIDITY -->
+      <mat-card class="mon-card">
+        <div class="mon-card-header">
+          <mat-icon>water_drop</mat-icon>
+          <span>Humidity</span>
+          <span
+            class="mon-chip"
+            [ngClass]="{
+              'mon-chip--normal': humidityStatus() === 'NORMAL',
+              'mon-chip--warning': humidityStatus() === 'WARNING',
+              'mon-chip--critical': humidityStatus() === 'CRITICAL'
+            }"
+          >
+            {{ humidityStatus() }}
+          </span>
+        </div>
+
+        <div class="mon-value">
+          {{ humidity() | number: '1.1-1' }}<span class="mon-unit">%</span>
+        </div>
+
+        <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
+          <polyline
+            [attr.points]="sparklinePoints('humidity')"
+            fill="none"
+            stroke="var(--mon-hum-color, #3b82f6)"
+            stroke-width="2"
+          />
+        </svg>
+
+        <p class="mon-range-hint">Rango permitido: {{ rules().minHumidity }}% – {{ rules().maxHumidity }}%</p>
+      </mat-card>
+    </div>
+
+    <mat-card class="mon-history-card" *ngIf="history().length > 0">
       <div class="mon-card-header">
-        <mat-icon>thermostat</mat-icon>
-        <span>Temperature</span>
-        <span
-          class="mon-chip"
-          [ngClass]="{
-            'mon-chip--normal': temperatureStatus() === 'NORMAL',
-            'mon-chip--warning': temperatureStatus() === 'WARNING',
-            'mon-chip--critical': temperatureStatus() === 'CRITICAL'
-          }"
-        >
-          {{ temperatureStatus() }}
-        </span>
+        <mat-icon>history</mat-icon>
+        <span>Recent readings</span>
+        <span class="mon-last-update">Last update: {{ lastUpdate() | date: 'HH:mm:ss' }}</span>
       </div>
 
-      <div class="mon-value">
+      <div class="mon-table-wrapper">
+        <table class="mon-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Temperature (°C)</th>
+              <th>Humidity (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let point of history().slice().reverse(); trackBy: trackByTime">
+              <td>{{ point.time }}</td>
+              <td>{{ point.temperature | number: '1.1-1' }}</td>
+              <td>{{ point.humidity | number: '1.1-1' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </mat-card>
+  </ng-container>
+
+  <ng-template #noDeviceState>
+    <mat-card class="mon-no-device-card">
+      <mat-icon>sensors_off</mat-icon>
+      <p>Este vehículo no tiene un dispositivo IoT asignado.</p>
+      <p class="mon-no-device-hint">Asigna un dispositivo desde Fleet → Vehicles para ver sus datos en vivo.</p>
+    </mat-card>
+  </ng-template>
+</ng-container>
+
+<!-- ---------------- TEMPERATURE DETAIL OVERLAY ---------------- -->
+<div class="mon-overlay" *ngIf="showTempDetail()" (click)="closeTempDetail()">
+  <div class="mon-detail-panel" (click)="$event.stopPropagation()">
+    <div class="mon-detail-header">
+      <div class="mon-detail-title">
+        <mat-icon>thermostat</mat-icon>
+        <span>Temperature detail — {{ selectedVehicle()?.plate }}</span>
+      </div>
+      <button mat-icon-button (click)="closeTempDetail()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="mon-detail-value-row">
+      <div class="mon-detail-value">
         {{ temperature() | number: '1.1-1' }}<span class="mon-unit">°C</span>
       </div>
+      <span
+        class="mon-chip mon-chip--lg"
+        [ngClass]="{
+          'mon-chip--normal': temperatureStatus() === 'NORMAL',
+          'mon-chip--warning': temperatureStatus() === 'WARNING',
+          'mon-chip--critical': temperatureStatus() === 'CRITICAL'
+        }"
+      >
+        {{ temperatureStatus() }}
+      </span>
+    </div>
 
-      <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
+    <mat-button-toggle-group
+      class="mon-timeline-toggle"
+      [value]="timelineWindow()"
+      (change)="selectTimelineWindow($event.value)"
+    >
+      <mat-button-toggle value="10s">10 segundos</mat-button-toggle>
+      <mat-button-toggle value="1m">1 minuto</mat-button-toggle>
+      <mat-button-toggle value="5m">5 minutos</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <div class="mon-detail-chart-wrapper">
+      <svg
+        *ngIf="detailHistory().length > 1; else notEnoughData"
+        class="mon-detail-chart"
+        viewBox="0 0 640 220"
+        preserveAspectRatio="none"
+      >
+        <line
+          x1="0" [attr.y1]="detailThresholdY(rules().maxTemperature)"
+          x2="640" [attr.y2]="detailThresholdY(rules().maxTemperature)"
+          class="mon-threshold-line"
+        />
+        <line
+          x1="0" [attr.y1]="detailThresholdY(rules().minTemperature)"
+          x2="640" [attr.y2]="detailThresholdY(rules().minTemperature)"
+          class="mon-threshold-line"
+        />
         <polyline
-          [attr.points]="sparklinePoints('temperature')"
+          [attr.points]="detailChartPoints()"
           fill="none"
           stroke="var(--mon-temp-color, #ef4444)"
-          stroke-width="2"
+          stroke-width="2.5"
         />
       </svg>
+      <ng-template #notEnoughData>
+        <div class="mon-detail-chart-empty">
+          <mat-icon>hourglass_empty</mat-icon>
+          <p>Recopilando datos para esta ventana de tiempo…</p>
+        </div>
+      </ng-template>
+    </div>
 
-      <p class="mon-range-hint">Expected range: ~19°C – 21°C (ambient, ±1°C)</p>
-    </mat-card>
-
-    <!-- HUMIDITY -->
-    <mat-card class="mon-card">
-      <div class="mon-card-header">
-        <mat-icon>water_drop</mat-icon>
-        <span>Humidity</span>
-        <span
-          class="mon-chip"
-          [ngClass]="{
-            'mon-chip--normal': humidityStatus() === 'NORMAL',
-            'mon-chip--warning': humidityStatus() === 'WARNING',
-            'mon-chip--critical': humidityStatus() === 'CRITICAL'
-          }"
-        >
-          {{ humidityStatus() }}
-        </span>
+    <div class="mon-rules-panel">
+      <div class="mon-rules-header">
+        <mat-icon>rule</mat-icon>
+        <span>Reglas de temperatura</span>
       </div>
-
-      <div class="mon-value">
-        {{ humidity() | number: '1.1-1' }}<span class="mon-unit">%</span>
+      <div class="mon-rules-grid">
+        <div class="mon-rule-item">
+          <span class="mon-rule-label">Mínimo permitido</span>
+          <span class="mon-rule-value">{{ rules().minTemperature }}°C</span>
+        </div>
+        <div class="mon-rule-item">
+          <span class="mon-rule-label">Máximo permitido</span>
+          <span class="mon-rule-value">{{ rules().maxTemperature }}°C</span>
+        </div>
+        <div class="mon-rule-item">
+          <span class="mon-rule-label">Humedad mín. – máx.</span>
+          <span class="mon-rule-value">{{ rules().minHumidity }}% – {{ rules().maxHumidity }}%</span>
+        </div>
+        <div class="mon-rule-item">
+          <span class="mon-rule-label">Origen de la regla</span>
+          <span class="mon-rule-value">
+            {{ rules().source === 'trip' ? 'Parámetros del viaje #' + rules().tripId : 'Rango ambiente por defecto' }}
+          </span>
+        </div>
       </div>
-
-      <svg *ngIf="history().length > 1" class="mon-sparkline" viewBox="0 0 260 56" preserveAspectRatio="none">
-        <polyline
-          [attr.points]="sparklinePoints('humidity')"
-          fill="none"
-          stroke="var(--mon-hum-color, #3b82f6)"
-          stroke-width="2"
-        />
-      </svg>
-
-      <p class="mon-range-hint">Expected range: ~83% – 85% (±1%)</p>
-    </mat-card>
+      <p class="mon-rules-note" *ngIf="rules().source === 'trip'">
+        Estas reglas provienen de la carga configurada para el viaje en curso de este vehículo.
+      </p>
+      <p class="mon-rules-note" *ngIf="rules().source === 'ambient'">
+        El vehículo no tiene un viaje en curso, así que se aplica un rango ambiente genérico.
+      </p>
+    </div>
   </div>
-
-  <mat-card class="mon-history-card" *ngIf="history().length > 0">
-    <div class="mon-card-header">
-      <mat-icon>history</mat-icon>
-      <span>Recent readings</span>
-      <span class="mon-last-update">Last update: {{ lastUpdate() | date: 'HH:mm:ss' }}</span>
-    </div>
-
-    <div class="mon-table-wrapper">
-      <table class="mon-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Temperature (°C)</th>
-            <th>Humidity (%)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let point of history().slice().reverse(); trackBy: trackByTime">
-            <td>{{ point.time }}</td>
-            <td>{{ point.temperature | number: '1.1-1' }}</td>
-            <td>{{ point.humidity | number: '1.1-1' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </mat-card>
-</ng-container>
+</div>

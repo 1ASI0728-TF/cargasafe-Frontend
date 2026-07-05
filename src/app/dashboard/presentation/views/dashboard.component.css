@@ -179,6 +179,11 @@
   color: #d97706;
 }
 
+.status-created {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
 .trip-details p {
   margin: 0.5rem 0;
   color: #374151;

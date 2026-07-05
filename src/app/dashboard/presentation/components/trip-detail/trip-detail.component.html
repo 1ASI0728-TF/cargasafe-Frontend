@@ -17,16 +17,27 @@
 
     <!-- Main Card -->
     <div class="main-card">
-      
+
       <!-- Header with Trip Details -->
       <div class="trip-header">
         <div class="header-title">
           <mat-icon class="header-icon">inventory_2</mat-icon>
           <h1>Trip Details</h1>
+
+          <span class="mode-badge mode-badge--live" *ngIf="viewMode === 'LIVE'">
+            <span class="live-dot"></span> LIVE
+          </span>
+          <span class="mode-badge mode-badge--history" *ngIf="viewMode === 'HISTORY'">
+            <mat-icon>history</mat-icon> HISTORY ONLY
+          </span>
         </div>
 
         <!-- Trip Info Grid -->
         <div class="trip-info-grid">
+          <div class="info-item">
+            <span class="info-label">Vehicle:</span>
+            <span class="info-value">{{ trip.vehiclePlate }}</span>
+          </div>
           <div class="info-item">
             <span class="info-label">Driver:</span>
             <span class="info-value">{{ trip.driverName }}</span>
@@ -47,23 +58,27 @@
             <span class="info-label">Distance traveled:</span>
             <span class="info-value">{{ trip.distance }} km</span>
           </div>
-          <div class="info-item">
+          <div class="info-item" *ngIf="viewMode === 'HISTORY' || viewMode === 'CANCELLED'">
             <span class="info-label">Trip end:</span>
             <span class="info-value">{{ formatDateTime(trip.endDate) }}</span>
+          </div>
+          <div class="info-item" *ngIf="viewMode === 'LIVE'">
+            <span class="info-label">Last sensor update:</span>
+            <span class="info-value">{{ lastLiveUpdate ? formatDateTime(lastLiveUpdate) : '—' }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Charts Section -->
-      <div class="charts-container">
-        
+      <!-- Charts Section: only while there is actual sensor data to show -->
+      <div class="charts-container" *ngIf="viewMode === 'LIVE' || viewMode === 'HISTORY'">
+
         <!-- Temperature Chart -->
         <div class="chart-card">
           <div class="chart-header">
             <mat-icon>thermostat</mat-icon>
             <h2>Temperature vs Time</h2>
           </div>
-          
+
           <ngx-charts-line-chart
             [view]="view"
             [scheme]="temperatureColorScheme"
@@ -86,11 +101,11 @@
             </div>
             <div class="legend-item">
               <div class="legend-line upper-limit"></div>
-              <span>Upper Limit (8°C)</span>
+              <span>Upper Limit ({{ tempUpperLimit }}°C)</span>
             </div>
             <div class="legend-item">
               <div class="legend-line lower-limit"></div>
-              <span>Lower Limit (2°C)</span>
+              <span>Lower Limit ({{ tempLowerLimit }}°C)</span>
             </div>
           </div>
         </div>
@@ -101,7 +116,7 @@
             <mat-icon>vibration</mat-icon>
             <h2>Vibration vs Time</h2>
           </div>
-          
+
           <ngx-charts-line-chart
             [view]="view"
             [scheme]="vibrationColorScheme"
@@ -128,6 +143,25 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Empty states: not started / cancelled / no device -->
+      <div class="empty-state" *ngIf="viewMode === 'NOT_STARTED'">
+        <mat-icon>schedule</mat-icon>
+        <p>Este viaje aún no ha comenzado.</p>
+        <p class="empty-state-hint">Los datos del sensor aparecerán aquí en tiempo real en cuanto el viaje esté "In Progress".</p>
+      </div>
+
+      <div class="empty-state" *ngIf="viewMode === 'CANCELLED'">
+        <mat-icon>cancel</mat-icon>
+        <p>Este viaje fue cancelado.</p>
+        <p class="empty-state-hint">No hay datos de sensor disponibles para un viaje cancelado.</p>
+      </div>
+
+      <div class="empty-state" *ngIf="viewMode === 'NO_DEVICE'">
+        <mat-icon>sensors_off</mat-icon>
+        <p>El vehículo {{ trip.vehiclePlate }} no tiene un dispositivo IoT asignado.</p>
+        <p class="empty-state-hint">Asigna un dispositivo desde Fleet → Vehicles para ver datos en vivo de este viaje.</p>
       </div>
 
     </div>

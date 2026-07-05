@@ -1,279 +1,179 @@
-# 🚛 CargaSafe - IoT Cargo Monitoring Platform
+# CargaSafe Frontend — Test Build (Demo con fake-backend)
 
-[![Angular](https://img.shields.io/badge/Angular-20.3.3-DD0031?style=flat&logo=angular)](https://angular.io/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+Esta entrega convierte el proyecto en una **versión de prueba** que corre 100% en el
+navegador (fake-backend + `localStorage`), pero sin que se note que es una demo, y con
+todas las pantallas reaccionando en vivo a lo que hace el "dispositivo IoT" simulado.
 
-Real-time cold chain monitoring system for cargo transportation built with Angular 20 and Domain-Driven Design architecture. Tracks vehicle fleets, monitors sensor data (temperature, movement, humidity), and manages alerts to ensure cargo integrity during transit.
-
----
-
-## 📋 Table of Contents
-
-- [Purpose](#-purpose)
-- [Technologies](#-technologies)
-- [Technical Features](#-technical-features)
-- [Project Structure](#-project-structure)
-- [Installation](#-installation)
-- [Running the Application](#-running-the-application)
-- [Responsive Breakpoints](#-responsive-breakpoints)
-- [Internationalization (i18n)](#-internationalization-i18n)
+No se tocó nada del diseño/estructura general del proyecto: solo se reemplazan los
+23 archivos listados abajo.
 
 ---
 
-## 🎯 Purpose
+## 1. Cómo aplicar los cambios
 
-CargaSafe is an enterprise-grade web application designed to monitor and manage refrigerated cargo transportation through IoT sensors. The platform enables logistics companies to:
-
-- **Monitor cargo conditions** in real-time (temperature, humidity, movement)
-- **Track fleet vehicles** and their associated IoT devices
-- **Manage alerts** for temperature violations, excessive vibrations, and door openings
-- **Analyze incidents** through interactive dashboards and monthly reports
-- **Manage subscriptions** with tiered pricing plans for scalability
-
----
-
-## 🛠️ Technologies
-
-### **Core Framework**
-- **Angular 20.3.3** - Standalone Components Architecture
-- **TypeScript 5.6** - Type-safe development
-- **RxJS 7.8** - Reactive programming
-
-### **UI/UX**
-- **Angular Material 18** - Material Design components
-- **NGX Charts 20** - Data visualization and charting
-- **CSS3** - Custom responsive styling
-
-### **Architecture & Patterns**
-- **Domain-Driven Design (DDD)** - Tactical patterns implementation
-- **Clean Architecture** - Layered separation of concerns
-- **Repository Pattern** - Data access abstraction
-- **SOLID Principles** - Maintainable and scalable codebase
-
-### **Development Tools**
-- **JSON Server** - Mock REST API for development
-- **ESBuild** - Fast bundling and build optimization
-- **Jasmine/Karma** - Unit testing framework
-
----
-
-## ⚡ Technical Features
-
-### **Architecture Highlights**
-- ✅ **Domain-Driven Design** with bounded contexts (Dashboard, Fleet, Alerts, Subscriptions)
-- ✅ **Rich Domain Models** with business logic encapsulation
-- ✅ **Aggregate Roots** for transactional consistency
-- ✅ **Value Objects** for immutable domain concepts
-- ✅ **Use Cases** for application orchestration
-- ✅ **Repository Interfaces** with HTTP implementations
-
-### **Application Features**
-- 📊 **Real-time Dashboard** with KPI metrics and incident charts
-- 🚛 **Fleet Management** (vehicles and IoT devices CRUD)
-- 🚨 **Alert System** with filtering, sorting, and resolution workflows
-- 📈 **Analytics** with monthly incident reports and data visualization
-- 💳 **Subscription Management** with multiple pricing tiers
-- 🔐 **Authentication** with login, registration, and password recovery
-
-### **Code Quality**
-- 🧩 **Standalone Components** (Angular 20 modern approach)
-- 🎨 **Reactive Forms** with validation
-- 🔄 **Observable-based** state management
-- 📦 **Lazy Loading** for optimized bundle size
-- 🧪 **Unit Tests** with Jasmine/Karma
-
----
-
-## 📁 Project Structure
+1. Descomprime el zip que te compartí.
+2. Copia cada archivo respetando la misma ruta relativa dentro de tu proyecto
+   (van a **reemplazar** los archivos existentes; 3 de ellos son nuevos):
 
 ```
-carga-safe/
-├── src/
-│   ├── app/
-│   │   ├── dashboard/                 # Dashboard Bounded Context
-│   │   │   ├── domain/
-│   │   │   │   └── entities/         # Domain entities (Trip, Alert)
-│   │   │   ├── application/
-│   │   │   │   └── services/         # Use cases and orchestration
-│   │   │   ├── infrastructure/       # (To be implemented: HTTP repos)
-│   │   │   └── presentation/
-│   │   │       ├── pages/            # Routed pages (dashboard, trip-detail)
-│   │   │       └── components/       # Reusable UI components
-│   │   │
-│   │   ├── fleet/                     # Fleet Management Bounded Context
-│   │   │   └── presentation/
-│   │   │       ├── pages/            # Vehicle/Device management
-│   │   │       └── components/       # Forms and tables
-│   │   │
-│   │   ├── alerts/                    # Alerts Bounded Context
-│   │   │   └── presentation/
-│   │   │       ├── pages/            # Alerts page
-│   │   │       └── components/       # Alert table
-│   │   │
-│   │   ├── subscription/              # Subscription Bounded Context
-│   │   ├── iam/                       # Identity & Access Management
-│   │   └── shared/
-│   │       ├── domain/               # Shared domain concepts
-│   │       ├── infrastructure/       # Base API services
-│   │       └── presentation/         # Layout and shared components
-│   │
-│   ├── assets/                        # Static resources
-│   │   ├── i18n/                     # Translation files (future)
-│   │   ├── icons/                    # SVG icons
-│   │   └── images/                   # Images
-│   │
-│   └── environment/                   # Environment configurations
-│
-├── server/
-│   └── db.json                       # JSON Server mock database
-│
-└── public/                            # Public assets
+src/app/app.ts
+
+src/app/core/fake-backend/fake-db.ts
+src/app/core/fake-backend/fake-backend.interceptor.ts
+src/app/core/fake-backend/fake-db-events.service.ts        ← NUEVO
+src/app/core/iot-simulation/iot-simulation.service.ts       ← NUEVO
+
+src/app/shared/presentation/directives/long-press.directive.ts   ← NUEVO
+src/app/shared/presentation/layout/root-layout/root-layout.ts
+src/app/shared/presentation/layout/root-layout/root-layout.html
+src/app/shared/presentation/layout/root-layout/root-layout.css
+
+src/app/iam/presentation/pages/login-page/login-page.ts
+src/app/iam/presentation/pages/login-page/login-page.html
+src/app/iam/presentation/pages/login-page/login-page.css
+
+src/app/monitoring/presentation/views/vehicle-monitoring/vehicle-monitoring.component.ts
+src/app/monitoring/presentation/views/vehicle-monitoring/vehicle-monitoring.component.html
+src/app/monitoring/presentation/views/vehicle-monitoring/vehicle-monitoring.component.css
+
+src/app/dashboard/application/services/dashboard.service.ts
+src/app/dashboard/presentation/views/dashboard.component.ts
+src/app/dashboard/presentation/views/dashboard.component.html
+src/app/dashboard/presentation/views/dashboard.component.css
+src/app/dashboard/presentation/components/trip-detail/trip-detail.component.ts
+src/app/dashboard/presentation/components/trip-detail/trip-detail.component.html
+src/app/dashboard/presentation/components/trip-detail/trip-detail.component.css
+
+src/app/alerts/application/alert.store.ts
 ```
 
----
+3. Instala dependencias y corre normalmente:
 
-## 🚀 Installation
-
-### **Prerequisites**
-- **Node.js** 18.x or higher
-- **npm** 9.x or higher
-- **Angular CLI** (optional, for global commands)
-
-### **Clone the Repository**
-```bash
-git clone https://github.com/Los-Parkers-IoT/iot-solutions-development-cargasafe-frontend.git
-cd iot-solutions-development-cargasafe-frontend/carga-safe
-```
-
-### **Install Dependencies**
 ```bash
 npm install
+npm start   # o: ng serve
 ```
+
+No hace falta ningún backend real ni variables de entorno nuevas — todo sigue viviendo
+en `localStorage`, como ya lo hacía el fake-backend original.
+
+> ⚠️ Como cambié la forma en que se guardan los datos (nueva versión de "seed"), la
+> primera vez que abras la app con estos archivos, el `localStorage` viejo se ignora
+> automáticamente y se siembra la base de datos nueva (2 camiones / 1 dispositivo).
+> No necesitas borrar nada a mano.
 
 ---
 
-## ▶️ Running the Application
+## 2. Qué se hizo, punto por punto
 
-### **1. Start the Mock API Server**
-```bash
-npm run db:server
-```
-- Runs on `http://localhost:3000`
-- Provides REST endpoints for trips, alerts, vehicles, devices, etc.
+### 1) Ya no se nota que es una demo
+- Se quitó por completo el cuadro **"Test build · demo accounts"** de la vista de Login
+  (los botones de autocompletar cuentas y el link de "reset").
+- El login ahora solo tiene el formulario normal (email / password).
+- El reset de la base de datos sigue existiendo, pero se movió a un **truco oculto**
+  (ver punto 7).
 
-### **2. Start the Development Server**
-```bash
-npm start
-```
-- Runs on `http://localhost:4200`
-- Auto-reloads on file changes
+### 2) Dashboard y Alerts se actualizan solos
+- Antes, el Dashboard leía un set de datos "de analítica" separado y estático (no tenía
+  nada que ver con los vehículos/viajes reales).
+- Ahora el Dashboard y el endpoint `/analytics/trips` calculan todo **en vivo** a partir
+  de las tablas reales (`vehicles`, `trips`, `alerts`). Si agregas un vehículo desde
+  Fleet, o si el sensor genera una alerta nueva, el Dashboard y la vista de Alerts se
+  refrescan solos (sin recargar la página) gracias a un pequeño sistema de eventos
+  (`FakeDbEventsService`) que avisa cada vez que la base de datos cambia.
+- Se agregaron 2 tarjetas nuevas al Dashboard: **Vehicles** y **Devices Online**.
 
-### **3. Access the Application**
-Open your browser and navigate to:
-```
-http://localhost:4200
-```
+### 3) Base de datos inicial: 2 camiones (Truck), 1 solo dispositivo IoT
+- `fake-db.ts` ahora siembra exactamente:
+  - `TRK-001` (Truck) → **con** el único dispositivo IoT (`IMEI-8841205`)
+  - `TRK-002` (Truck) → **sin** dispositivo asignado
+- Viajes de ejemplo (para poder probar los 3 escenarios pedidos):
+  - Viaje **IN_PROGRESS** en `TRK-001` → tiene datos en vivo (tiene dispositivo).
+  - Viaje **CREATED** (no iniciado) en `TRK-002` → sin dispositivo, no hay datos.
+  - Viaje **COMPLETED** en `TRK-001` → solo historial, ya no genera datos en vivo.
 
-**Default Login Credentials:**
-- Email: `admin@mail.com`
-- Password: `admin`
+### 4) "Recent Trips" → viaje IN PROGRESS → gráfico en tiempo real
+- En el Dashboard, sección **Recent Trips**, si haces clic en el viaje que está
+  **In Progress** (el de `TRK-001`), la vista de detalle empieza a mostrar el gráfico de
+  Temperatura y Vibración **actualizándose cada ~2 segundos**, con los mismos datos que
+  estaría generando el dispositivo IoT real (mismo motor que usa la pantalla de
+  Monitoring).
+- Verás un badge rojo **"LIVE"** parpadeando arriba a la derecha del título mientras el
+  viaje sigue en curso.
 
----
+### 5) Monitoring → clic en el gráfico de Temperatura → detalle en grande
+- En la vista **Monitoring**, la tarjeta de Temperatura ahora es clickeable (o con Enter
+  si usas teclado). Al hacer clic se abre un panel más grande con:
+  - El valor de temperatura en grande y su estado (NORMAL / WARNING / CRITICAL).
+  - Botones para elegir la ventana de tiempo del gráfico: **10 segundos**, **1 minuto**
+    o **5 minutos**.
+  - Líneas punteadas mostrando el límite superior/inferior configurado.
+  - Un panel de **"Reglas de temperatura"** con el mínimo, máximo, rango de humedad y de
+    dónde salen esas reglas (del viaje activo del vehículo, o un rango ambiente genérico
+    si no tiene ningún viaje en curso).
 
-## 📱 Responsive Breakpoints
+### 6) Viajes COMPLETED no muestran gráfico en tiempo real
+- La vista de detalle del viaje (Dashboard → Recent Trips → detalle) distingue 4 casos:
+  - **LIVE**: viaje `IN_PROGRESS` + vehículo con dispositivo → gráfico en vivo (2s).
+  - **HISTORY**: viaje `COMPLETED` → se genera **una sola vez** un historial fijo (no
+    vuelve a "tickear"); badge gris **"HISTORY ONLY"**.
+  - **NOT_STARTED**: viaje `CREATED` → mensaje "Este viaje aún no ha comenzado".
+  - **NO_DEVICE**: viaje en curso pero el vehículo no tiene dispositivo → mensaje
+    explicando que hay que asignar uno desde Fleet.
 
-The application is fully responsive and adapts to the following breakpoints:
-
-| Breakpoint | Width | Target Devices |
-|------------|-------|----------------|
-| **Mobile** | < 768px | Smartphones |
-| **Tablet** | 768px - 1024px | Tablets, small laptops |
-| **Desktop** | > 1024px | Desktops, large screens |
-
-### **Responsive Features**
-- ✅ Collapsible sidebar navigation on mobile
-- ✅ Adaptive grid layouts for cards and tables
-- ✅ Touch-friendly UI components
-- ✅ Optimized chart rendering for small screens
-
----
-
-## 🌐 Internationalization (i18n)
-
-### **Current Status**
-The application is currently **available in English only**.
-
-### **Future Support**
-The project structure includes an `assets/i18n/` directory prepared for multi-language support using:
-- **@ngx-translate/core** (to be integrated)
-- Planned languages: English (en), Spanish (es)
-
-### **Translation Structure** (Planned)
-```
-assets/i18n/
-├── en.json    # English translations
-└── es.json    # Spanish translations
-```
-
-To enable i18n in the future, install the required package:
-```bash
-npm install @ngx-translate/core @ngx-translate/http-loader
-```
-
----
-
-## 📜 Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start development server (port 4200) |
-| `npm run db:server` | Start JSON Server mock API (port 3000) |
-| `npm run build` | Build for production |
-| `npm test` | Run unit tests |
-| `npm run watch` | Build in watch mode |
+### 7) Truco oculto para resetear la base de datos
+- **Mantén presionado el logo de CargaSafe por 3 segundos** (funciona en:
+  - el ícono del logo en la pantalla de Login, y
+  - el logo del sidebar / header una vez que iniciaste sesión).
+- Mientras lo mantienes presionado vas a ver un pequeño anillo/barra de progreso
+  llenándose alrededor o debajo del logo, como feedback visual de que "algo está
+  pasando".
+- Al completar los 3 segundos: aparece un mensaje ("Datos reiniciados correctamente")
+  y la app se recarga sola, ya con la base de datos original (2 camiones, 1 dispositivo,
+  3 viajes de ejemplo) — como si fuera la primera vez que se abre.
+- No hay ningún botón ni texto visible que insinúe que este truco existe.
 
 ---
 
-## 🏗️ Architecture Diagram
+## 3. Cómo probar rápido cada cosa
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   PRESENTATION                      │
-│  (Pages, Components, View Models)                   │
-└───────────────────┬─────────────────────────────────┘
-                    │ Uses
-                    ▼
-┌─────────────────────────────────────────────────────┐
-│                  APPLICATION                        │
-│  (Use Cases, DTOs, Orchestration)                   │
-└───────────────────┬─────────────────────────────────┘
-                    │ Uses
-                    ▼
-┌─────────────────────────────────────────────────────┐
-│                    DOMAIN                           │
-│  (Entities, Value Objects, Domain Services)         │
-└───────────────────┬─────────────────────────────────┘
-                    │ Implemented by
-                    ▼
-┌─────────────────────────────────────────────────────┐
-│                INFRASTRUCTURE                       │
-│  (HTTP Repositories, Mappers, External APIs)        │
-└─────────────────────────────────────────────────────┘
-```
+1. **Login sin pistas de demo** → abre la app, confirma que no aparece ningún texto de
+   "demo accounts" ni botones de autocompletar.
+2. **Reset oculto** → mantén clic en el logo (login o sidebar) por 3s → deberías ver el
+   feedback y luego la recarga.
+3. **Fleet con 2 camiones / 1 dispositivo** → ve a Fleet → Vehicles: verás `TRK-001`
+   (con dispositivo) y `TRK-002` (sin dispositivo). En Fleet → Devices solo hay 1.
+4. **Dashboard en vivo** → deja el Dashboard abierto ~1 minuto: la tarjeta "Total Alerts"
+   puede subir sola si la temperatura simulada se sale de rango (el motor IoT corre en
+   segundo plano todo el tiempo, no solo dentro de Monitoring).
+5. **Recent Trips → gráfico en vivo** → en el Dashboard, clic en el viaje "In Progress"
+   → verás el badge LIVE y los gráficos moviéndose cada ~2 segundos.
+6. **Viaje completado → solo historial** → vuelve al Dashboard, abre el otro viaje
+   (Completed) → verás el badge "HISTORY ONLY" y el gráfico ya no se mueve.
+7. **Monitoring → detalle de Temperatura** → ve a Monitoring, selecciona `TRK-001`, haz
+   clic en la tarjeta de Temperatura → se abre el panel grande con los botones de
+   10s / 1m / 5m y las reglas de temperatura.
+8. **Vehículo sin dispositivo** → en Monitoring selecciona `TRK-002` → verás el mensaje
+   de que no tiene dispositivo IoT asignado, sin datos falsos mostrándose.
 
 ---
 
-## 📄 License
+## 4. Notas técnicas (por si luego quieres seguir extendiendo esto)
 
-This project is licensed under the **MIT License**.
-
----
-
-## 👥 Team
-
-**Los Parkers IoT** - Development Team
-
----
-
-**Made with ❤️ using Angular 20 and Domain-Driven Design**
+- **Motor de simulación único**: `src/app/core/iot-simulation/iot-simulation.service.ts`
+  es ahora la única fuente de datos de sensores. Corre un `setInterval` global (cada 2s)
+  para cada vehículo que tenga un dispositivo asignado, sin importar qué pantalla esté
+  abierta (se inyecta una vez en `app.ts` para arrancar apenas carga la app). Guarda su
+  estado en `localStorage` bajo la clave `cargasafe_iot_sim::<vehicleId>`.
+- **Alertas automáticas**: el mismo motor genera una alerta ("High/Low Temperature")
+  cuando la temperatura se sale del rango configurado (rango del viaje activo, o un
+  rango ambiente por defecto si no hay viaje en curso), con un pequeño "debounce" para
+  no crear una alerta nueva en cada tick.
+- **Eventos de base de datos**: `fake-db.ts` expone un mini pub/sub (`onDbChange`) sin
+  depender de Angular ni RxJS; `FakeDbEventsService` lo envuelve en un Observable para
+  que el Dashboard y el store de Alerts puedan reaccionar en vivo.
+- **Reset**: `resetDb()` en `fake-db.ts` ahora también borra los snapshots del motor IoT
+  guardados en `localStorage` (antes solo reseteaba las tablas de negocio).
+- Todo compila limpio con `ng build` (Angular 20, zoneless change detection) — solo
+  quedan los mismos warnings que ya traía el proyecto original (no relacionados a estos
+  cambios).

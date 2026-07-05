@@ -27,9 +27,11 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
+  FakeAlert,
   FakeDatabase,
   FakeDeliveryOrder,
   FakeTrip,
+  FakeVehicle,
   displayNameForUser,
   getDb,
   nextId,
@@ -98,6 +100,115 @@ function composeTripResource(db: FakeDatabase, trip: FakeTrip) {
     createdAt: trip.createdAt,
     updatedAt: trip.updatedAt,
   };
+}
+
+// ---------------------------------------------------------------
+// Dashboard analytics — derived live from the real trips/vehicles/
+// alerts tables instead of a separate static dataset, so the
+// Dashboard and Alerts screens always reflect the current fleet
+// (more vehicles, trips that started/finished, new IoT alerts, etc).
+// ---------------------------------------------------------------
+
+function classifyAlertType(alertType: string): 'TEMPERATURE' | 'HUMIDITY' | 'MOVEMENT' | 'LOCATION' {
+  const t = alertType.toLowerCase();
+  if (t.includes('temp')) return 'TEMPERATURE';
+  if (t.includes('humid')) return 'HUMIDITY';
+  if (t.includes('vibrat') || t.includes('movement') || t.includes('shock')) return 'MOVEMENT';
+  return 'LOCATION';
+}
+
+/** Finds which trip (if any) a raw fake alert belongs to, via its delivery order. */
+function tripForAlert(db: FakeDatabase, alert: FakeAlert): FakeTrip | undefined {
+  if (alert.deliveryOrderId == null) return undefined;
+  const order = db.deliveryOrders.find((d) => d.id === alert.deliveryOrderId);
+  if (!order) return undefined;
+  return db.trips.find((t) => t.id === order.tripId);
+}
+
+function composeAnalyticsAlert(db: FakeDatabase, alert: FakeAlert) {
+  const trip = tripForAlert(db, alert);
+  const vehicle = trip ? db.vehicles.find((v) => v.id === trip.vehicleId) : undefined;
+  const type = classifyAlertType(alert.alertType);
+  return {
+    id: alert.id,
+    tripId: trip ? String(trip.id) : '',
+    deviceId: vehicle?.deviceImeis?.[0] ?? 'N/A',
+    vehiclePlate: vehicle?.plate ?? 'N/A',
+    type,
+    severity: alert.alertStatus === 'CLOSED' ? 'LOW' : type === 'TEMPERATURE' ? 'HIGH' : 'MEDIUM',
+    timestamp: alert.createdAt,
+    resolved: alert.alertStatus === 'CLOSED',
+    description: alert.description,
+  };
+}
+
+function composeAnalyticsTrip(db: FakeDatabase, trip: FakeTrip) {
+  const vehicle = db.vehicles.find((v) => v.id === trip.vehicleId);
+  const origin = db.originPoints.find((o) => o.id === trip.originPointId);
+  const orders = db.deliveryOrders
+    .filter((d) => d.tripId === trip.id)
+    .sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  const lastOrder = orders[orders.length - 1];
+  const cargoType = vehicle?.capabilities?.includes('REFRIGERATED') ? 'Carga refrigerada' : 'Carga general';
+  // Deterministic pseudo-distance so it stays stable across reloads without needing a real field.
+  const distance = 60 + ((trip.id * 137) % 420);
+  const alertsForTrip = db.alerts.filter((a) => tripForAlert(db, a)?.id === trip.id);
+
+  return {
+    id: trip.id,
+    startDate: trip.startedAt ?? trip.createdAt,
+    endDate: trip.completedAt ?? trip.startedAt ?? trip.createdAt,
+    origin: origin?.name ?? 'N/A',
+    destination: lastOrder?.address ?? 'Destino por definir',
+    vehiclePlate: vehicle?.plate ?? 'N/A',
+    vehicleId: vehicle?.id ?? null,
+    deviceId: trip.deviceId,
+    hasDevice: !!vehicle?.deviceImeis?.length,
+    driverName: trip.driverName,
+    cargoType,
+    status: trip.status,
+    distance,
+    alerts: alertsForTrip.map((a) => composeAnalyticsAlert(db, a)),
+  };
+}
+
+/** Merges the live count of temperature/movement alerts raised this calendar month into the historical chart data. */
+function withCurrentMonthIncidents(db: FakeDatabase) {
+  const now = new Date();
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+  const currentMonthName = monthNames[now.getMonth()];
+  const currentYear = now.getFullYear();
+
+  const thisMonthAlerts = db.alerts.filter((a) => {
+    const created = new Date(a.createdAt);
+    return created.getMonth() === now.getMonth() && created.getFullYear() === currentYear;
+  });
+
+  const currentMonthEntry = {
+    month: currentMonthName,
+    year: currentYear,
+    temperatureIncidents: thisMonthAlerts.filter((a) => classifyAlertType(a.alertType) === 'TEMPERATURE').length,
+    movementIncidents: thisMonthAlerts.filter((a) => classifyAlertType(a.alertType) === 'MOVEMENT').length,
+    totalIncidents: thisMonthAlerts.length,
+    incidents: thisMonthAlerts.map((a) => {
+      const trip = tripForAlert(db, a);
+      const vehicle = trip ? db.vehicles.find((v) => v.id === trip.vehicleId) : undefined;
+      return {
+        timestamp: a.createdAt,
+        vehiclePlate: vehicle?.plate ?? 'N/A',
+        deviceId: vehicle?.deviceImeis?.[0] ?? 'N/A',
+        type: classifyAlertType(a.alertType),
+      };
+    }),
+  };
+
+  const withoutCurrentMonth = db.incidentsByMonth.filter(
+    (entry) => !(entry.month === currentMonthName && entry.year === currentYear)
+  );
+  return [...withoutCurrentMonth, currentMonthEntry];
 }
 
 // ---------------------------------------------------------------
@@ -467,23 +578,36 @@ function handleRequest(method: string, pathname: string, query: URLSearchParams,
 
   // ---------------- DASHBOARD ANALYTICS ----------------
   if (method === 'GET' && (m = match(/^\/analytics\/trips\/([^/]+)$/, pathname))) {
-    const trip = db.analyticsTrips.find((t) => String(t.id) === m![1]);
+    const trip = db.trips.find((t) => String(t.id) === m![1]);
     if (!trip) throw new FakeApiError(404, { message: 'Trip not found' });
-    return ok(trip);
+    return ok(composeAnalyticsTrip(db, trip));
   }
 
   if (method === 'GET' && pathname === '/analytics/trips') {
-    return ok(db.analyticsTrips);
+    const sorted = [...db.trips].sort(
+      (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+    return ok(sorted.map((t) => composeAnalyticsTrip(db, t)));
   }
 
   if (method === 'GET' && pathname === '/analytics/alerts') {
     const tripId = query.get('tripId');
-    if (tripId) return ok(db.analyticsAlerts.filter((a) => a.tripId === tripId));
-    return ok(db.analyticsAlerts);
+    const composed = db.alerts.map((a) => composeAnalyticsAlert(db, a));
+    if (tripId) return ok(composed.filter((a) => a.tripId === tripId));
+    return ok(composed);
   }
 
   if (method === 'GET' && pathname === '/analytics/incidents-by-month') {
-    return ok(db.incidentsByMonth);
+    return ok(withCurrentMonthIncidents(db));
+  }
+
+  if (method === 'GET' && pathname === '/analytics/fleet-summary') {
+    return ok({
+      totalVehicles: db.vehicles.length,
+      totalDevices: db.devices.length,
+      onlineDevices: db.devices.filter((d) => d.online).length,
+      vehiclesWithDevice: db.vehicles.filter((v) => v.deviceImeis.length > 0).length,
+    });
   }
 
   // ---------------- BILLING: PLANS / SUBSCRIPTIONS / PAYMENTS ----------------

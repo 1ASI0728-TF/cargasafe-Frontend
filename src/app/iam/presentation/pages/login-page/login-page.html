@@ -1,9 +1,27 @@
 <div class="login-container">
   <div class="left-panel">
-    <div class="logo-container">
-      <svg class="logo-icon" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l1.96 2.5H17V9.5m-11 9A1.5 1.5 0 017.5 17 1.5 1.5 0 016 15.5 1.5 1.5 0 014.5 17 1.5 1.5 0 016 18.5M20 8h-3V4H3c-1.11 0-2 .89-2 2v11h2a3 3 0 003 3 3 3 0 003-3h6a3 3 0 003 3 3 3 0 003-3h2v-5l-3-4z"/>
-      </svg>
+    <div
+      class="logo-container"
+      appLongPress
+      [appLongPressDuration]="3000"
+      (longPress)="onSecretReset()"
+      (longPressProgress)="onResetProgress($event)"
+      [class.is-resetting]="resetProgress > 0"
+    >
+      <div class="logo-icon-wrapper">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l1.96 2.5H17V9.5m-11 9A1.5 1.5 0 017.5 17 1.5 1.5 0 016 15.5 1.5 1.5 0 014.5 17 1.5 1.5 0 016 18.5M20 8h-3V4H3c-1.11 0-2 .89-2 2v11h2a3 3 0 003 3 3 3 0 003-3h6a3 3 0 003 3 3 3 0 003-3h2v-5l-3-4z"/>
+        </svg>
+        <svg class="logo-progress-ring" viewBox="0 0 44 44" *ngIf="resetProgress > 0">
+          <circle
+            cx="22" cy="22" r="20"
+            fill="none"
+            stroke-width="3"
+            [style.stroke-dasharray]="125.6"
+            [style.stroke-dashoffset]="125.6 - (125.6 * resetProgress)"
+          />
+        </svg>
+      </div>
       <h1 class="logo-text">CargaSafe</h1>
     </div>
 
@@ -90,27 +108,6 @@
           <a href="#" class="signup-link" (click)="onSignUp($event)">Sign up here</a>
         </p>
       </form>
-
-      <!-- TEST BUILD: demo accounts + reset shortcut (fake, in-browser API, no real backend) -->
-      <div class="demo-accounts-box">
-        <p class="demo-accounts-title">Test build · demo accounts</p>
-        <div class="demo-accounts-buttons">
-          <button
-            type="button"
-            mat-stroked-button
-            *ngFor="let account of demoAccounts"
-            (click)="fillDemoAccount(account)"
-          >
-            {{ account.label }}
-          </button>
-        </div>
-        <p class="demo-accounts-hint">
-          Fills the credentials above — just click "Sign In" afterwards.
-        </p>
-        <a href="#" class="demo-reset-link" (click)="onResetDemoData($event)">
-          Reset demo data
-        </a>
-      </div>
     </div>
   </div>
 </div>

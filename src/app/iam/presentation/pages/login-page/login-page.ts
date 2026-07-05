@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../application/auth.service.';
 import { resetDb } from '../../../../core/fake-backend/fake-db';
+import { LongPressDirective } from '../../../../shared/presentation/directives/long-press.directive';
 
 @Component({
   selector: 'app-login-page',
@@ -23,6 +24,7 @@ import { resetDb } from '../../../../core/fake-backend/fake-db';
     MatButtonModule,
     MatSnackBarModule,
     MatIconModule,
+    LongPressDirective,
   ],
   templateUrl: './login-page.html',
   styleUrls: ['./login-page.css'],
@@ -39,13 +41,9 @@ export class LoginPageComponent {
   showPassword = false;
   isLoading = false;
 
-  // Demo/testing build: this app runs entirely on a fake, in-browser API
-  // (see src/app/core/fake-backend). These are the two seeded demo accounts,
-  // one per user type, shown here so testers don't need to sign up first.
-  readonly demoAccounts = [
-    { label: 'Operator demo', email: 'operador@cargasafe.com', password: 'operator123' },
-    { label: 'Client demo', email: 'cliente@cargasafe.com', password: 'client123' },
-  ];
+  /** 0..1 fill progress of the hidden "hold logo to reset" gesture, for the visual ring feedback. */
+  resetProgress = 0;
+  isResetting = false;
 
   isFormValid(): boolean {
     return !!this.email && !!this.password;
@@ -96,21 +94,31 @@ export class LoginPageComponent {
     this.router.navigate(['/register']);
   }
 
-  /** Quick-fills the form with one of the seeded demo accounts. */
-  fillDemoAccount(account: { email: string; password: string }): void {
-    this.email = account.email;
-    this.password = account.password;
+  /** Visual feedback (0..1) while the logo is being held down. */
+  onResetProgress(progress: number): void {
+    this.resetProgress = progress;
     this.cdr.detectChanges();
   }
 
-  /** Wipes the fake, in-browser database and reseeds it with the original demo data. */
-  onResetDemoData(event: Event): void {
-    event.preventDefault();
+  /**
+   * Hidden trick: holding the CargaSafe logo for 3 seconds wipes the
+   * fake, in-browser database and reseeds it with the original demo
+   * data. Kept out of the UI copy on purpose so the app doesn't read
+   * as a demo/test build.
+   */
+  onSecretReset(): void {
+    if (this.isResetting) return;
+    this.isResetting = true;
     resetDb();
-    this.snackBar.open('Demo data has been reset.', undefined, {
-      duration: 2000,
+
+    this.snackBar.open('Datos reiniciados correctamente.', undefined, {
+      duration: 1600,
       horizontalPosition: 'right',
       verticalPosition: 'top',
     });
+
+    // A full reload guarantees every screen/service starts clean against
+    // the freshly-seeded database (fleet, trips, live sensor state, etc).
+    setTimeout(() => window.location.reload(), 900);
   }
 }

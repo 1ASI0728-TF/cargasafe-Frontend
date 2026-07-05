@@ -1,7 +1,6 @@
 import {
   Component,
   OnInit,
-  OnDestroy,
   HostListener,
   ChangeDetectorRef,
   inject,
@@ -17,54 +16,26 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { FleetStore } from '../../../../fleet/application/fleet.store';
 import { Vehicle } from '../../../../fleet/domain/model/vehicle.model';
 import { Device } from '../../../../fleet/domain/model/device.model';
-import { getDb, nextId, nowIso, saveDb } from '../../../../core/fake-backend/fake-db';
+import {
+  IotSimulationService,
+  SensorStatus,
+  SensorTickPoint,
+  TemperatureRules,
+} from '../../../../core/iot-simulation/iot-simulation.service';
 
-type SensorStatus = 'NORMAL' | 'WARNING' | 'CRITICAL';
+type TimelineWindow = '10s' | '1m' | '5m';
 
-interface HistoryPoint {
-  time: string;
-  temperature: number;
-  humidity: number;
-}
-
-interface SimulationSnapshot {
-  temperature: number;
-  humidity: number;
-  tempBaseline: number;
-  humidityBaseline: number;
-  history: HistoryPoint[];
-  updatedAt: string;
-}
-
-const TEMP_BASELINE_DEFAULT = 20;
-const HUMIDITY_BASELINE_DEFAULT = 84;
-const TICK_INTERVAL_MS = 2500;
-const HISTORY_LIMIT = 24;
-const SIM_STORAGE_PREFIX = 'cargasafe_iot_sim::';
-
-function round1(value: number): number {
-  return Math.round(value * 10) / 10;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function getTemperatureStatus(temp: number): SensorStatus {
-  if (temp < 15 || temp > 25) return 'CRITICAL';
-  if (temp < 18 || temp > 22) return 'WARNING';
-  return 'NORMAL';
-}
-
-function getHumidityStatus(humidity: number): SensorStatus {
-  if (humidity < 75 || humidity > 92) return 'CRITICAL';
-  if (humidity < 80 || humidity > 88) return 'WARNING';
-  return 'NORMAL';
-}
+const WINDOW_MS: Record<TimelineWindow, number> = {
+  '10s': 10_000,
+  '1m': 60_000,
+  '5m': 5 * 60_000,
+};
 
 function worstStatus(a: SensorStatus, b: SensorStatus): SensorStatus {
   const rank: Record<SensorStatus, number> = { NORMAL: 0, WARNING: 1, CRITICAL: 2 };
@@ -82,18 +53,19 @@ function worstStatus(a: SensorStatus, b: SensorStatus): SensorStatus {
     MatSelectModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MatButtonModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './vehicle-monitoring.component.html',
   styleUrls: ['./vehicle-monitoring.component.css'],
 })
-export class VehicleMonitoringComponent implements OnInit, OnDestroy {
+export class VehicleMonitoringComponent implements OnInit {
   private fleetStore = inject(FleetStore);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
+  private iot = inject(IotSimulationService);
 
-  private intervalId?: ReturnType<typeof setInterval>;
-  private initialStateLoaded = false;
-  private criticalAlertRaised = false;
+  private initialVehiclePicked = false;
 
   // ---------------- Fleet data ----------------
   vehicles = computed<Vehicle[]>(() => this.fleetStore.vehiclesSig());
@@ -112,37 +84,64 @@ export class VehicleMonitoringComponent implements OnInit, OnDestroy {
     return this.devices().find((d) => vehicle.deviceImeis.includes(d.imei)) ?? null;
   });
 
-  // ---------------- Live simulated sensor data ----------------
-  temperature = signal(TEMP_BASELINE_DEFAULT);
-  humidity = signal(HUMIDITY_BASELINE_DEFAULT);
-  lastUpdate = signal<Date>(new Date());
-  history = signal<HistoryPoint[]>([]);
-  alertBanner = signal<string | null>(null);
+  hasDevice = computed(() => {
+    const vehicle = this.selectedVehicle();
+    return !!vehicle?.id && this.iot.hasDevice(vehicle.id);
+  });
 
-  private tempBaseline = TEMP_BASELINE_DEFAULT;
-  private humidityBaseline = HUMIDITY_BASELINE_DEFAULT;
+  // ---------------- Live sensor data (shared engine, ticks in the background app-wide) ----------------
+  private simState = computed(() => {
+    const vehicle = this.selectedVehicle();
+    if (!vehicle?.id) return null;
+    return this.iot.getState(vehicle.id)();
+  });
 
-  temperatureStatus = computed<SensorStatus>(() => getTemperatureStatus(this.temperature()));
-  humidityStatus = computed<SensorStatus>(() => getHumidityStatus(this.humidity()));
-  overallStatus = computed<SensorStatus>(() =>
-    worstStatus(this.temperatureStatus(), this.humidityStatus())
+  temperature = computed(() => this.simState()?.temperature ?? 0);
+  humidity = computed(() => this.simState()?.humidity ?? 0);
+  history = computed<SensorTickPoint[]>(() => this.simState()?.history ?? []);
+  lastUpdate = computed(() => new Date(this.simState()?.updatedAt ?? Date.now()));
+
+  rules = computed<TemperatureRules>(() => {
+    const vehicle = this.selectedVehicle();
+    return this.iot.getRules(vehicle?.id ?? -1);
+  });
+
+  temperatureStatus = computed<SensorStatus>(() =>
+    this.iot.rangeStatus(this.temperature(), this.rules().minTemperature, this.rules().maxTemperature)
   );
+  humidityStatus = computed<SensorStatus>(() =>
+    this.iot.rangeStatus(this.humidity(), this.rules().minHumidity, this.rules().maxHumidity)
+  );
+  overallStatus = computed<SensorStatus>(() => worstStatus(this.temperatureStatus(), this.humidityStatus()));
+
+  alertBanner = computed<string | null>(() =>
+    this.hasDevice() && this.temperatureStatus() === 'CRITICAL'
+      ? '⚠️ Temperatura fuera de rango — se generó una alerta automática. Revisa la sección "Alerts".'
+      : null
+  );
+
+  // ---------------- Temperature detail overlay (click-to-expand) ----------------
+  showTempDetail = signal(false);
+  timelineWindow = signal<TimelineWindow>('1m');
+
+  private windowMs = computed(() => WINDOW_MS[this.timelineWindow()]);
+
+  detailHistory = computed<SensorTickPoint[]>(() => {
+    const cutoff = Date.now() - this.windowMs();
+    return this.history().filter((p) => p.timestamp >= cutoff);
+  });
 
   // Auto-selects the first vehicle with an assigned IoT device once the fleet loads.
   private autoSelectEffect = effect(() => {
     const vehicles = this.vehicles();
-    if (vehicles.length === 0) return;
+    if (vehicles.length === 0 || this.initialVehiclePicked) return;
 
     if (this.selectedVehicleId() == null) {
       const withDevice = vehicles.find((v) => (v.deviceImeis?.length ?? 0) > 0);
       const fallback = withDevice ?? vehicles[0];
       this.selectedVehicleId.set(fallback.id ?? null);
     }
-
-    if (!this.initialStateLoaded) {
-      this.initialStateLoaded = true;
-      this.loadSimulationState();
-    }
+    this.initialVehiclePicked = true;
   });
 
   ngOnInit(): void {
@@ -152,13 +151,8 @@ export class VehicleMonitoringComponent implements OnInit, OnDestroy {
     const queryVehicleId = Number(this.route.snapshot.queryParamMap.get('vehicleId'));
     if (queryVehicleId) {
       this.selectedVehicleId.set(queryVehicleId);
+      this.initialVehiclePicked = true;
     }
-
-    this.intervalId = setInterval(() => this.tick(), TICK_INTERVAL_MS);
-  }
-
-  ngOnDestroy(): void {
-    if (this.intervalId) clearInterval(this.intervalId);
   }
 
   // ---------------- Hidden test shortcut: N = -1°C, M = +1°C ----------------
@@ -170,154 +164,69 @@ export class VehicleMonitoringComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const vehicle = this.selectedVehicle();
+    if (!vehicle?.id || !this.hasDevice()) return;
+
     const key = event.key.toLowerCase();
     if (key === 'n') {
-      this.tempBaseline = round1(this.tempBaseline - 1);
-      this.tick();
+      this.iot.nudgeTemperatureBaseline(vehicle.id, -1);
     } else if (key === 'm') {
-      this.tempBaseline = round1(this.tempBaseline + 1);
-      this.tick();
+      this.iot.nudgeTemperatureBaseline(vehicle.id, 1);
     }
   }
 
   selectVehicle(vehicleId: number): void {
     if (vehicleId === this.selectedVehicleId()) return;
     this.selectedVehicleId.set(vehicleId);
-    this.loadSimulationState();
+    this.showTempDetail.set(false);
     this.cdr.detectChanges();
   }
 
-  private storageKeyForSelectedVehicle(): string | null {
-    const id = this.selectedVehicleId();
-    return id == null ? null : `${SIM_STORAGE_PREFIX}${id}`;
+  openTempDetail(): void {
+    if (!this.hasDevice()) return;
+    this.showTempDetail.set(true);
   }
 
-  private loadSimulationState(): void {
-    const key = this.storageKeyForSelectedVehicle();
-    this.criticalAlertRaised = false;
-    this.alertBanner.set(null);
-
-    if (key) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (raw) {
-          const snapshot = JSON.parse(raw) as SimulationSnapshot;
-          this.tempBaseline = snapshot.tempBaseline ?? TEMP_BASELINE_DEFAULT;
-          this.humidityBaseline = snapshot.humidityBaseline ?? HUMIDITY_BASELINE_DEFAULT;
-          this.temperature.set(snapshot.temperature ?? TEMP_BASELINE_DEFAULT);
-          this.humidity.set(snapshot.humidity ?? HUMIDITY_BASELINE_DEFAULT);
-          this.history.set(snapshot.history ?? []);
-          this.lastUpdate.set(new Date(snapshot.updatedAt ?? nowIso()));
-          this.cdr.detectChanges();
-          return;
-        }
-      } catch {
-        // fall through to defaults if the stored snapshot is corrupted
-      }
-    }
-
-    this.tempBaseline = TEMP_BASELINE_DEFAULT;
-    this.humidityBaseline = HUMIDITY_BASELINE_DEFAULT;
-    this.temperature.set(TEMP_BASELINE_DEFAULT);
-    this.humidity.set(HUMIDITY_BASELINE_DEFAULT);
-    this.history.set([]);
-    this.tick();
+  closeTempDetail(): void {
+    this.showTempDetail.set(false);
   }
 
-  private persistState(): void {
-    const key = this.storageKeyForSelectedVehicle();
-    if (!key) return;
-    const snapshot: SimulationSnapshot = {
-      temperature: this.temperature(),
-      humidity: this.humidity(),
-      tempBaseline: this.tempBaseline,
-      humidityBaseline: this.humidityBaseline,
-      history: this.history(),
-      updatedAt: this.lastUpdate().toISOString(),
-    };
-    try {
-      localStorage.setItem(key, JSON.stringify(snapshot));
-    } catch {
-      // localStorage might be unavailable (e.g. private browsing quota) — safe to ignore in a demo
-    }
+  selectTimelineWindow(window: TimelineWindow): void {
+    this.timelineWindow.set(window);
   }
 
-  private tick(): void {
-    if (this.selectedVehicleId() == null) return;
+  trackByTime = (_: number, point: SensorTickPoint) => point.timestamp;
 
-    const tempNoise = Math.random() * 2 - 1; // ±1°C
-    const humidityNoise = Math.random() * 2 - 1; // ±1%
-
-    const nextTemp = round1(this.tempBaseline + tempNoise);
-    const nextHumidity = round1(clamp(this.humidityBaseline + humidityNoise, 0, 100));
-    const now = new Date();
-
-    this.temperature.set(nextTemp);
-    this.humidity.set(nextHumidity);
-    this.lastUpdate.set(now);
-    this.history.update((points) =>
-      [
-        ...points,
-        {
-          time: now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          temperature: nextTemp,
-          humidity: nextHumidity,
-        },
-      ].slice(-HISTORY_LIMIT)
-    );
-
-    this.checkForAutomaticAlert(nextTemp);
-    this.persistState();
-    this.cdr.detectChanges();
-  }
-
-  private checkForAutomaticAlert(temp: number): void {
-    const status = getTemperatureStatus(temp);
-
-    if (status !== 'CRITICAL') {
-      this.criticalAlertRaised = false;
-      return;
-    }
-
-    if (this.criticalAlertRaised) return;
-    this.criticalAlertRaised = true;
-
-    const vehicle = this.selectedVehicle();
-    const plate = vehicle?.plate ?? 'vehículo';
-    const isHigh = temp > 25;
-    const description = isHigh
-      ? `Temperatura simulada de ${temp}°C en ${plate} supera el máximo esperado (IoT monitoring).`
-      : `Temperatura simulada de ${temp}°C en ${plate} está por debajo del mínimo esperado (IoT monitoring).`;
-
-    const db = getDb();
-    db.alerts.unshift({
-      id: nextId(db.alerts),
-      alertType: isHigh ? 'High Temperature' : 'Low Temperature',
-      alertStatus: 'OPEN',
-      createdAt: nowIso(),
-      closedAt: null,
-      description,
-      incidents: [],
-      notifications: [],
-    });
-    saveDb(db);
-
-    this.alertBanner.set('⚠️ Se generó una alerta automáticamente. Revisa la sección "Alerts".');
-    setTimeout(() => {
-      this.alertBanner.set(null);
-      this.cdr.detectChanges();
-    }, 5000);
-  }
-
-  trackByTime = (_: number, point: HistoryPoint) => point.time;
-
-  /** Builds an SVG polyline `points` attribute from the recent history, for a tiny inline sparkline. */
+  /** Builds an SVG polyline `points` attribute for a small inline sparkline. */
   sparklinePoints(metric: 'temperature' | 'humidity'): string {
-    const points = this.history();
+    return this.buildPolyline(this.history(), metric, 260, 56);
+  }
+
+  /** Same idea but larger, and scoped to the selected timeline window, for the expanded detail view. */
+  detailChartPoints(): string {
+    return this.buildPolyline(this.detailHistory(), 'temperature', 640, 220);
+  }
+
+  /** Y position (in the detail chart's coordinate space) of a threshold line, for min/max rule markers. */
+  detailThresholdY(value: number): number {
+    const points = this.detailHistory();
+    const height = 220;
+    if (points.length === 0) return height / 2;
+    const values = points.map((p) => p.temperature);
+    const min = Math.min(...values, this.rules().minTemperature);
+    const max = Math.max(...values, this.rules().maxTemperature);
+    const range = max - min || 1;
+    return height - ((value - min) / range) * height;
+  }
+
+  private buildPolyline(
+    points: SensorTickPoint[],
+    metric: 'temperature' | 'humidity',
+    width: number,
+    height: number
+  ): string {
     if (points.length < 2) return '';
 
-    const width = 260;
-    const height = 56;
     const values = points.map((p) => (metric === 'temperature' ? p.temperature : p.humidity));
     const min = Math.min(...values);
     const max = Math.max(...values);

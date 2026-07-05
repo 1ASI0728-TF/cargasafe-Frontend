@@ -1,11 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { Trip, IncidentsByMonthData, Alert, AlertType } from '../../domain/entities';
-import { DashboardService } from '../../application/services/dashboard.service';
+import { DashboardService, FleetSummary } from '../../application/services/dashboard.service';
 import { IncidentsChartComponent } from '../components/incidents-chart/incidents-chart.component';
+import { FakeDbEventsService } from '../../../core/fake-backend/fake-db-events.service';
 
 // Interfaz extendida para el tooltip con información de incidencias
 interface TripWithIncidents extends Trip {
@@ -21,11 +23,14 @@ interface TripWithIncidents extends Trip {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   trips: Trip[] = [];
   alerts: Alert[] = [];
   incidentsData: IncidentsByMonthData[] = [];
+  fleetSummary: FleetSummary = { totalVehicles: 0, totalDevices: 0, onlineDevices: 0, vehiclesWithDevice: 0 };
   loading = true;
+
+  private dbEventsSub?: Subscription;
 
   // ngx-charts data
   chartData: any[] = [];
@@ -71,11 +76,23 @@ export class DashboardComponent implements OnInit {
   constructor(
     private dashboardService: DashboardService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private fakeDbEvents: FakeDbEventsService
   ) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
+
+    // Live updates: whenever the fake DB changes (new IoT alert, a trip
+    // starting/finishing, a vehicle added from Fleet, etc.) refresh the
+    // Dashboard without showing the initial full-page loading state.
+    this.dbEventsSub = this.fakeDbEvents.changes$.pipe(debounceTime(700)).subscribe(() => {
+      this.loadDashboardData(false);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dbEventsSub?.unsubscribe();
   }
 
   // ngx-charts event handlers
@@ -259,14 +276,15 @@ export class DashboardComponent implements OnInit {
     console.log('🚗 Navigating to trip detail:', tripId);
   }
 
-  private loadDashboardData(): void {
-    this.loading = true;
+  private loadDashboardData(showLoading = true): void {
+    if (showLoading) this.loading = true;
     console.log('🚀 Loading dashboard data...');
 
     forkJoin({
       trips: this.dashboardService.getTrips(),
       alerts: this.dashboardService.getAlerts(),
-      incidentsData: this.dashboardService.getIncidentsByMonth()
+      incidentsData: this.dashboardService.getIncidentsByMonth(),
+      fleetSummary: this.dashboardService.getFleetSummary()
     }).subscribe({
       next: (data) => {
         console.log('✅ Data loaded successfully:', data);
@@ -274,6 +292,7 @@ export class DashboardComponent implements OnInit {
         this.trips = [...(data.trips || [])];
         this.alerts = [...(data.alerts || [])];
         this.incidentsData = [...(data.incidentsData || [])];
+        this.fleetSummary = data.fleetSummary;
         
         console.log('📊 Trips:', this.trips.length, this.trips);
         console.log('🚨 Alerts:', this.alerts.length, this.alerts);
@@ -304,6 +323,8 @@ export class DashboardComponent implements OnInit {
         return 'status-cancelled';
       case 'DELAYED':
         return 'status-delayed';
+      case 'CREATED':
+        return 'status-created';
       default:
         return '';
     }
@@ -319,6 +340,8 @@ export class DashboardComponent implements OnInit {
         return 'Cancelled';
       case 'DELAYED':
         return 'Delayed';
+      case 'CREATED':
+        return 'Not started';
       default:
         return status;
     }

@@ -237,3 +237,194 @@
   padding: 8px 10px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
+
+.mon-range-source {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* ---------------- Clickable temperature card ---------------- */
+.mon-card--clickable {
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.mon-card--clickable:hover,
+.mon-card--clickable:focus-visible {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.mon-expand-hint {
+  margin-left: 8px;
+  font-size: 16px !important;
+  height: 16px !important;
+  width: 16px !important;
+  color: rgba(0, 0, 0, 0.35) !important;
+}
+
+.mon-click-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-style: italic;
+}
+
+/* ---------------- No-device state ---------------- */
+.mon-no-device-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 20px !important;
+  color: rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+
+.mon-no-device-card mat-icon {
+  font-size: 36px;
+  height: 36px;
+  width: 36px;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.mon-no-device-hint {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0;
+}
+
+/* ---------------- Temperature detail overlay ---------------- */
+.mon-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 20, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.mon-detail-panel {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.mon-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mon-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.mon-detail-value-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.mon-detail-value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.mon-chip--lg {
+  font-size: 0.8rem;
+  padding: 4px 14px;
+}
+
+.mon-timeline-toggle {
+  margin-bottom: 16px;
+}
+
+.mon-detail-chart-wrapper {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 20px;
+}
+
+.mon-detail-chart {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+.mon-threshold-line {
+  stroke: rgba(239, 68, 68, 0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+
+.mon-detail-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 0;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.mon-rules-panel {
+  background: #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.mon-rules-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.mon-rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.mon-rule-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mon-rule-label {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.mon-rule-value {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mon-rules-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.5);
+}

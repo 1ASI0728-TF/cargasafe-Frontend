@@ -2,25 +2,31 @@
  * FAKE DATABASE (localStorage-backed)
  * ------------------------------------------------------------------
  * This module is the single source of truth for the "fake backend".
- * It replaces the previous external API (Railway) / local json-server
- * (server/db.json + server/routes.json) with a database that lives
- * entirely in the browser's localStorage.
+ * It replaces any external API with a database that lives entirely
+ * in the browser's localStorage.
  *
- * - On first load, it seeds itself with demo data (2 demo accounts,
- *   vehicles, devices, trips, alerts, subscriptions, etc).
+ * - On first load, it seeds itself with demo data (3 demo accounts,
+ *   a small fleet, trips, alerts, subscriptions, etc).
  * - Every write goes straight to localStorage, so data survives
- *   page reloads and browser restarts ("para la siguiente").
- * - `resetDb()` wipes everything and reseeds, useful to get back to
- *   a clean demo state.
+ *   page reloads and browser restarts.
+ * - `resetDb()` wipes everything (including the live IoT simulation
+ *   snapshots) and reseeds it from scratch.
+ * - A tiny listener registry (`onDbChange`) lets the rest of the app
+ *   react whenever the database changes — e.g. the Dashboard and the
+ *   Alerts screen re-fetch automatically when the IoT simulation
+ *   raises a new alert, or when an operator adds a vehicle.
  *
  * NOTE: this file has no Angular dependency on purpose, so it can be
- * imported both from the HTTP interceptor and from any component
- * that needs direct access to the fake data (e.g. the IoT monitoring
- * view, which creates alerts on the fly).
+ * imported both from the HTTP interceptor and from any component or
+ * service that needs direct access to the fake data (e.g. the IoT
+ * simulation engine).
  */
 
-export const FAKE_DB_STORAGE_KEY = 'cargasafe_fake_db_v1';
-const SEED_VERSION = 1;
+export const FAKE_DB_STORAGE_KEY = 'cargasafe_fake_db_v2';
+const SEED_VERSION = 2;
+
+/** Prefix used by the IoT simulation engine to persist per-vehicle sensor snapshots. */
+export const IOT_SIM_STORAGE_PREFIX = 'cargasafe_iot_sim::';
 
 // ---------------------------------------------------------------
 // Types (kept loose/plain so they match the *Resource shapes used
@@ -155,33 +161,6 @@ export interface FakePayment {
   paymentDate: string;
 }
 
-export interface FakeAnalyticsAlert {
-  id: string;
-  tripId: string;
-  deviceId: string;
-  vehiclePlate: string;
-  type: string;
-  severity: string;
-  timestamp: string;
-  location: { latitude: number; longitude: number; address?: string };
-  sensorData: { temperature?: number; humidity?: number; timestamp: string };
-  resolved: boolean;
-}
-
-export interface FakeAnalyticsTrip {
-  id: number;
-  startDate: string;
-  endDate: string;
-  origin: string;
-  destination: string;
-  vehiclePlate: string;
-  driverName: string;
-  cargoType: string;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'DELAYED';
-  distance: number;
-  alerts: FakeAnalyticsAlert[];
-}
-
 export interface FakeIncidentsByMonth {
   month: string;
   year: number;
@@ -205,8 +184,6 @@ export interface FakeDatabase {
   plans: FakePlan[];
   subscriptions: FakeSubscription[];
   payments: FakePayment[];
-  analyticsTrips: FakeAnalyticsTrip[];
-  analyticsAlerts: FakeAnalyticsAlert[];
   incidentsByMonth: FakeIncidentsByMonth[];
 }
 
@@ -236,6 +213,12 @@ function dateOnly(iso: string): string {
 
 // ---------------------------------------------------------------
 // Seed data
+// ------------------------------------------------------------------
+// TEST BUILD NOTE: the fleet intentionally starts small — just the
+// two trucks and single IoT device needed to demo every screen
+// (an in-progress trip with live sensor data, a completed trip with
+// only historical data, and a not-yet-started trip on the vehicle
+// that has no device attached).
 // ---------------------------------------------------------------
 
 function createSeedDatabase(): FakeDatabase {
@@ -251,29 +234,31 @@ function createSeedDatabase(): FakeDatabase {
   ];
 
   const vehicles: FakeVehicle[] = [
-    { id: 1, plate: 'FT-22', type: 'VAN', capabilities: ['REFRIGERATED'], status: 'IN_SERVICE', odometerKm: 110020, deviceImeis: ['IMEI-1234567'] },
-    { id: 2, plate: 'ABC-101', type: 'TRUCK', capabilities: ['REFRIGERATED', 'GPS'], status: 'IN_SERVICE', odometerKm: 54210, deviceImeis: ['IMEI-7654321'] },
-    { id: 3, plate: 'XYZ-555', type: 'MOTORCYCLE', capabilities: [], status: 'MAINTENANCE', odometerKm: 8899, deviceImeis: [] },
+    { id: 1, plate: 'TRK-001', type: 'TRUCK', capabilities: ['REFRIGERATED', 'GPS'], status: 'IN_SERVICE', odometerKm: 82150, deviceImeis: ['IMEI-8841205'] },
+    { id: 2, plate: 'TRK-002', type: 'TRUCK', capabilities: ['REFRIGERATED'], status: 'IN_SERVICE', odometerKm: 41890, deviceImeis: [] },
   ];
 
   const devices: FakeDevice[] = [
-    { id: 1, imei: 'IMEI-1234567', firmware: 'v1.8.2', online: true, vehiclePlate: 'FT-22' },
-    { id: 2, imei: 'IMEI-7654321', firmware: 'v2.0.0', online: true, vehiclePlate: 'ABC-101' },
-    { id: 3, imei: 'IMEI-0009999', firmware: 'v1.5.0', online: false, vehiclePlate: null },
+    { id: 1, imei: 'IMEI-8841205', firmware: 'v2.1.0', online: true, vehiclePlate: 'TRK-001' },
   ];
 
   const trips: FakeTrip[] = [
     {
+      // TRK-001 has the only IoT device and is currently on the road ->
+      // this is the trip that demonstrates the real-time chart.
       id: 1, driverId: 1, driverName: 'Carlos Ramos', deviceId: 1, vehicleId: 1, merchantId: 1, originPointId: 1,
       departureAt: hoursAgoIso(3), startedAt: hoursAgoIso(3), completedAt: null,
       status: 'IN_PROGRESS', createdAt: hoursAgoIso(4), updatedAt: hoursAgoIso(1),
     },
     {
-      id: 2, driverId: 1, driverName: 'Carlos Ramos', deviceId: 2, vehicleId: 2, merchantId: 1, originPointId: 2,
+      // TRK-002 has no device assigned and hasn't started yet.
+      id: 2, driverId: 1, driverName: 'Carlos Ramos', deviceId: 0, vehicleId: 2, merchantId: 1, originPointId: 2,
       departureAt: null, startedAt: null, completedAt: null,
       status: 'CREATED', createdAt: hoursAgoIso(2), updatedAt: hoursAgoIso(2),
     },
     {
+      // Finished trip on TRK-001 -> demonstrates the history-only view
+      // (no live chart once a trip is COMPLETED).
       id: 3, driverId: 1, driverName: 'Carlos Ramos', deviceId: 1, vehicleId: 1, merchantId: 1, originPointId: 1,
       departureAt: daysAgoIso(3), startedAt: daysAgoIso(3), completedAt: daysAgoIso(2),
       status: 'COMPLETED', createdAt: daysAgoIso(3), updatedAt: daysAgoIso(2),
@@ -343,57 +328,12 @@ function createSeedDatabase(): FakeDatabase {
     { id: 1001, userId: 1, receiptUrl: 'https://example.com/receipts/1001.pdf', transactionId: 'TX-0002', status: 'SUCCEEDED', amount: 59, paymentDate: daysAgoIso(39) },
   ];
 
-  const analyticsAlerts: FakeAnalyticsAlert[] = [
-    {
-      id: 'alert-1', tripId: '1', deviceId: 'IMEI-1234567', vehiclePlate: 'FT-22', type: 'TEMPERATURE', severity: 'HIGH',
-      timestamp: hoursAgoIso(1),
-      location: { latitude: -16.409, longitude: -71.5375, address: 'Carretera Panamericana Sur, Arequipa' },
-      sensorData: { temperature: 12.5, timestamp: hoursAgoIso(1) },
-      resolved: false,
-    },
-    {
-      id: 'alert-2', tripId: '3', deviceId: 'IMEI-1234567', vehiclePlate: 'FT-22', type: 'MOVEMENT', severity: 'MEDIUM',
-      timestamp: daysAgoIso(2),
-      location: { latitude: -12.0223, longitude: -77.1111, address: 'Av. Industrial 1200, Callao, Lima' },
-      sensorData: { temperature: 5.2, timestamp: daysAgoIso(2) },
-      resolved: true,
-    },
-  ];
-
-  const analyticsTrips: FakeAnalyticsTrip[] = [
-    {
-      id: 1, startDate: daysAgoIso(3), endDate: hoursAgoIso(1),
-      origin: 'Lima, Perú', destination: 'Arequipa, Perú', vehiclePlate: 'FT-22', driverName: 'Carlos Ramos',
-      cargoType: 'Productos Farmacéuticos', status: 'IN_PROGRESS', distance: 1015,
-      alerts: [analyticsAlerts[0]],
-    },
-    {
-      id: 2, startDate: hoursAgoIso(2), endDate: hoursAgoIso(2),
-      origin: 'Lima, Perú', destination: 'Trujillo, Perú', vehiclePlate: 'ABC-101', driverName: 'Carlos Ramos',
-      cargoType: 'Alimentos congelados', status: 'DELAYED', distance: 560,
-      alerts: [],
-    },
-    {
-      id: 3, startDate: daysAgoIso(3), endDate: daysAgoIso(2),
-      origin: 'Callao, Lima', destination: 'Lima, Perú', vehiclePlate: 'FT-22', driverName: 'Carlos Ramos',
-      cargoType: 'Productos Farmacéuticos', status: 'COMPLETED', distance: 42,
-      alerts: [analyticsAlerts[1]],
-    },
-    {
-      id: 4, startDate: daysAgoIso(10), endDate: daysAgoIso(10),
-      origin: 'Lima, Perú', destination: 'Ica, Perú', vehiclePlate: 'XYZ-555', driverName: 'Carlos Ramos',
-      cargoType: 'Insumos médicos', status: 'CANCELLED', distance: 300,
-      alerts: [],
-    },
-  ];
-
   const incidentsByMonth: FakeIncidentsByMonth[] = [
-    { month: 'Enero', year: 2026, temperatureIncidents: 2, movementIncidents: 1, totalIncidents: 3, incidents: [{ timestamp: daysAgoIso(160), vehiclePlate: 'FT-22', deviceId: 'IMEI-1234567', type: 'TEMPERATURE' }] },
-    { month: 'Febrero', year: 2026, temperatureIncidents: 1, movementIncidents: 0, totalIncidents: 1, incidents: [{ timestamp: daysAgoIso(130), vehiclePlate: 'ABC-101', deviceId: 'IMEI-7654321', type: 'TEMPERATURE' }] },
-    { month: 'Marzo', year: 2026, temperatureIncidents: 0, movementIncidents: 2, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(100), vehiclePlate: 'FT-22', deviceId: 'IMEI-1234567', type: 'MOVEMENT' }] },
-    { month: 'Abril', year: 2026, temperatureIncidents: 3, movementIncidents: 1, totalIncidents: 4, incidents: [{ timestamp: daysAgoIso(70), vehiclePlate: 'FT-22', deviceId: 'IMEI-1234567', type: 'TEMPERATURE' }] },
-    { month: 'Mayo', year: 2026, temperatureIncidents: 1, movementIncidents: 1, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(40), vehiclePlate: 'ABC-101', deviceId: 'IMEI-7654321', type: 'MOVEMENT' }] },
-    { month: 'Junio', year: 2026, temperatureIncidents: 2, movementIncidents: 0, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(10), vehiclePlate: 'FT-22', deviceId: 'IMEI-1234567', type: 'TEMPERATURE' }] },
+    { month: 'Febrero', year: 2026, temperatureIncidents: 1, movementIncidents: 0, totalIncidents: 1, incidents: [{ timestamp: daysAgoIso(130), vehiclePlate: 'TRK-001', deviceId: 'IMEI-8841205', type: 'TEMPERATURE' }] },
+    { month: 'Marzo', year: 2026, temperatureIncidents: 0, movementIncidents: 2, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(100), vehiclePlate: 'TRK-001', deviceId: 'IMEI-8841205', type: 'MOVEMENT' }] },
+    { month: 'Abril', year: 2026, temperatureIncidents: 3, movementIncidents: 1, totalIncidents: 4, incidents: [{ timestamp: daysAgoIso(70), vehiclePlate: 'TRK-001', deviceId: 'IMEI-8841205', type: 'TEMPERATURE' }] },
+    { month: 'Mayo', year: 2026, temperatureIncidents: 1, movementIncidents: 1, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(40), vehiclePlate: 'TRK-002', deviceId: 'N/A', type: 'MOVEMENT' }] },
+    { month: 'Junio', year: 2026, temperatureIncidents: 2, movementIncidents: 0, totalIncidents: 2, incidents: [{ timestamp: daysAgoIso(10), vehiclePlate: 'TRK-001', deviceId: 'IMEI-8841205', type: 'TEMPERATURE' }] },
   ];
 
   return {
@@ -418,10 +358,35 @@ function createSeedDatabase(): FakeDatabase {
     plans,
     subscriptions,
     payments,
-    analyticsTrips,
-    analyticsAlerts,
     incidentsByMonth,
   };
+}
+
+// ---------------------------------------------------------------
+// Change notification (plain pub/sub, no Angular/rxjs dependency)
+// ---------------------------------------------------------------
+
+type DbChangeListener = () => void;
+const dbChangeListeners: DbChangeListener[] = [];
+
+/** Subscribes to database changes (any `saveDb`/`resetDb` call). Returns an unsubscribe function. */
+export function onDbChange(listener: DbChangeListener): () => void {
+  dbChangeListeners.push(listener);
+  return () => {
+    const idx = dbChangeListeners.indexOf(listener);
+    if (idx >= 0) dbChangeListeners.splice(idx, 1);
+  };
+}
+
+function notifyDbChange(): void {
+  // Copy the array in case a listener unsubscribes itself while running.
+  dbChangeListeners.slice().forEach((listener) => {
+    try {
+      listener();
+    } catch (e) {
+      console.error('[fake-backend] dbChange listener threw', e);
+    }
+  });
 }
 
 // ---------------------------------------------------------------
@@ -450,6 +415,20 @@ function writeToStorage(db: FakeDatabase): void {
   }
 }
 
+/** Removes every persisted IoT simulation snapshot (per-vehicle sensor history). */
+function clearIotSimulationStorage(): void {
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(IOT_SIM_STORAGE_PREFIX)) keysToRemove.push(key);
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+  } catch (e) {
+    console.error('[fake-backend] Could not clear IoT simulation storage', e);
+  }
+}
+
 /** Returns the current fake database, seeding it on first use. */
 export function getDb(): FakeDatabase {
   if (memoryDb) return memoryDb;
@@ -466,17 +445,20 @@ export function getDb(): FakeDatabase {
   return memoryDb;
 }
 
-/** Persists the given database (or the in-memory one) to localStorage. */
+/** Persists the given database (or the in-memory one) to localStorage and notifies listeners. */
 export function saveDb(db: FakeDatabase = getDb()): void {
   memoryDb = db;
   writeToStorage(db);
+  notifyDbChange();
 }
 
-/** Wipes all fake data and reseeds it from scratch. */
+/** Wipes all fake data (including the live IoT simulation) and reseeds it from scratch. */
 export function resetDb(): FakeDatabase {
   const seeded = createSeedDatabase();
   memoryDb = seeded;
   writeToStorage(seeded);
+  clearIotSimulationStorage();
+  notifyDbChange();
   return seeded;
 }
 

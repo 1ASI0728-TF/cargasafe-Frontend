@@ -31,6 +31,14 @@
         <h3>Pending Alerts</h3>
         <span class="stat-number">{{ pendingAlerts }}</span>
       </div>
+      <div class="stat-card">
+        <h3>Vehicles</h3>
+        <span class="stat-number">{{ fleetSummary.totalVehicles }}</span>
+      </div>
+      <div class="stat-card">
+        <h3>Devices Online</h3>
+        <span class="stat-number">{{ fleetSummary.onlineDevices }}/{{ fleetSummary.totalDevices }}</span>
+      </div>
     </div>
           
     <!-- Data Preview -->

@@ -4,15 +4,29 @@
     <button class="menu-btn" aria-label="Open menu" (click)="toggleSidebar()">
       <mat-icon>menu</mat-icon>
     </button>
-    <div class="mobile-brand">
+    <div
+      class="mobile-brand"
+      appLongPress
+      [appLongPressDuration]="3000"
+      (longPress)="onSecretReset()"
+      (longPressProgress)="onResetProgress($event)"
+    >
       <img src="assets/svgs/logo-white.svg" alt="CargoSafe Logo" class="mobile-logo" />
+      <div class="logo-hold-progress" *ngIf="resetProgress() > 0" [style.width.%]="resetProgress() * 100"></div>
     </div>
   </header>
 
   <!-- Sidebar -->
   <aside class="sidebar" [class.open]="sidebarOpen()">
-    <div class="sidebar__brand">
+    <div
+      class="sidebar__brand"
+      appLongPress
+      [appLongPressDuration]="3000"
+      (longPress)="onSecretReset()"
+      (longPressProgress)="onResetProgress($event)"
+    >
       <img src="assets/svgs/logo-white.svg" alt="CargoSafe Logo" class="sidebar__logo" />
+      <div class="logo-hold-progress" *ngIf="resetProgress() > 0" [style.width.%]="resetProgress() * 100"></div>
     </div>
 
     <nav class="sidebar__nav">
